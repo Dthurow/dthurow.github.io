@@ -1,0 +1,99 @@
+:root{
+   --primary:  rgba(115,157, 52,1);
+   --secondary: rgba(204,235,157,1);
+   --third:  rgba( 79,117, 20,1);
+   --contrast: white;
+}
+
+h1{
+    padding:1%;
+    border-radius: 1%;
+    background-color: var(--primary);
+    font-size: 1.5em;
+}
+
+body{
+    margin:3%;
+    color: var(--contrast);
+    font: normal 100% Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+ul{
+    list-style-type: none;
+    padding-left: 1%;
+}
+
+.mainbody{
+    padding:1%;
+    background-color: var(--secondary);
+    border-radius: 4px;
+    color:var(--third);
+}
+
+.mainbody a{
+    text-decoration: none;
+    background-color: var(--contrast);
+    border-radius: 4px;
+    padding:4px;
+}
+.mainbody a:hover{
+    background-color: var(--primary);
+}
+
+a.imagelink{
+    background-color: inherit;
+    padding:0px;
+}
+
+
+.mainbody li{
+    padding-top: 3%;
+}
+
+.w3-button{
+    background-color: var(--contrast);
+    border: solid black 1px;
+    border-radius: 4px;
+}
+
+.PlantImage{
+    max-height: 60vh;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.examplepics img{
+    max-width: 400px;
+    margin: 5%;
+}
+
+.leftcolumn, .rightcolumn{
+    display:inline-block;
+    vertical-align: top;
+}
+
+.rightcolumn{
+    width: 74%;
+}
+.leftcolumn{
+    width:25%
+}
+
+.description{
+    padding-bottom: 10%;
+}
+
+footer{
+
+    background-color: var(--primary);
+    border-radius: 4px;
+    margin-top: 1%;
+    height: 75px;
+    padding: 1%;
+
+}
+footer div{
+    float:right;
+}
