@@ -10,9 +10,6 @@ meta:
   _thumbnail_id: '19'
 ---
 
-## The plan:
-
-
 I created a .NET Core API that talks with a sqllite3 database. The plan is to start with a sqllite3 database, and when I run into storage or other issues once the project is launched, I’ll switch to a bigger or fancier sql instance as needed. I’m to the point where I want to start building a test environment, so other people who help me with the project can test. Azure App Services allows you to do a local git push to an app service and auto-magically (using the Kudu build program) have your code running on the internet. It also allows 1gb of storage in the app service. Since I want to just have an initial website for testing purposes and not for production, having a sqllite3 database on the single server in the app service seems to make sense. I don’t have to pay for extra storage I won’t need, and I don’t have to worry about concurrency or scaling because it’s a single instance of the site, and I can deploy as I go using a git remote branch. KISS principle, right?
 
 ## The problem:

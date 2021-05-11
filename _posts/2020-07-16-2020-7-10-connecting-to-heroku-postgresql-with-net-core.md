@@ -15,7 +15,7 @@ meta: {}
 ---
 
 In my adventures using Heroku for hosting a .Net Core app (previous writeup here: 
-[https://daniellethurow.com/blog/2020/7/9/running-net-core-in-heroku](https://daniellethurow.com/blog/2020/7/9/running-net-core-in-heroku)), I decided to use the built-in Heroku postgresql database. Once again, there wasn’t an official way to connect a .Net Core app to that, so I had to piece together my own version. Happily it’s pretty straightforward. 
+[Running Net Core in Heroku]({% post_url 2020-07-09-2020-7-9-running-net-core-in-heroku %})), I decided to use the built-in Heroku postgresql database. Once again, there wasn’t an official way to connect a .Net Core app to that, so I had to piece together my own version. Happily it’s pretty straightforward. 
 
 I chose the Npgsql library (
 [https://www.npgsql.org/](https://www.npgsql.org/)) mainly because it seemed easy enough to use, and so far I haven’t had any issues with it. I then read through the library’s documentation and read Heroku’s documentation about connecting with other languages. Using that, I pieced together what was required to take the environment variable that Heroku sets in the app and transform it into a connection string that Npgsql will accept. 

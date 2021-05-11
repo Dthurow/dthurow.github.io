@@ -15,8 +15,6 @@ published: true
 meta: {}
 ---
 
- 
-
 Microcorruption ([https://microcorruption.com/](https://microcorruption.com/)) is a long-time running “game” that gives you a series of puzzles that you have to solve. The fun bit? You solve the puzzles by learning and abusing assembly language! It uses MSP430 assembly (apparently an assembly language made by TI, the calculator guys), and is all in-browser. It displays the disassembled code, a live dump of memory, a console, and the register values. The story around it is simple: you’re trying to break into warehouses that are locked with an electronic lock. The company you work for has gotten the code that the locks use and disassembled it, and it’s your job to step through the code and figure out the password to get the lock to open. Each level uses a more and more complicated version of the electronic lock, but thankfully, the developers who made the lock code are pretty characteristically overworked and/or underpaid, so the code is rife with lovely bugs or just stupid programming that you can take advantage of.
 
              

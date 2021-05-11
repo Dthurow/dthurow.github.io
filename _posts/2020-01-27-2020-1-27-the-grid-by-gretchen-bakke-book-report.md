@@ -11,7 +11,7 @@ type: post
 published: true
 meta: {}
 ---
-
+A book report on a recent non-fiction book that I read and enjoyed. 
 
 
 Goodreads link:

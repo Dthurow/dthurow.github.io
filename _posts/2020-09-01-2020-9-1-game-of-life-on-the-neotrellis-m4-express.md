@@ -16,13 +16,10 @@ meta:
   _thumbnail_id: '28'
 ---
 
-## Intro
-
-
 Once upon a time, I was subscribed to Adabox (
 [https://www.adafruit.com/adabox](https://www.adafruit.com/adabox/)), a quarterly subscription box that sends a collection of hobby electronic components that are ready for you to use in projects. Each box comes with a page online that shows different projects you can make with the products you get, and links to more documentation about each product. Honestly it felt perfect for me, someone who loves tinkering with microcontrollers (I’ve built out a pi-hole (
 [https://pi-hole.net](https://pi-hole.net/)) and a fun cyberpunk halloween costume (
-[https://daniellethurow.com/blog/cyberpunk-hacker-costume](https://daniellethurow.com/blog/cyberpunk-hacker-costume/)) before), but is also pretty new at figuring out what wires and alligator clips and connectors I’d need for what microcontroller. Unfortunately, I was always swamped at work, so I never had the time and energy to dive into the boxes, and I canceled after it became clear they were piling up without any projects being built.
+[Cyberpunk Hacker Costume]({% post_url 2019-03-14-cyberpunk-hacker-costume %})) before), but is also pretty new at figuring out what wires and alligator clips and connectors I’d need for what microcontroller. Unfortunately, I was always swamped at work, so I never had the time and energy to dive into the boxes, and I canceled after it became clear they were piling up without any projects being built.
 
 I’ve recently decided to finally unbox some that I haven’t touched yet, and decided the first one I’d try is the Adabox 10 (
 [https://learn.adafruit.com/adabox010/unboxing-adabox-010](https://learn.adafruit.com/adabox010/unboxing-adabox-010/)). This box comes with the Adafruit NeoTrellis M4, a fun dev board designed to light up and make some noise. The unique things about it are a 4 by 8 selection of neopixels (programmable LEDs) that can also function as buttons, as well as a lot of audio components that let it play audio samples and transform the audio on the fly. This gives you a lot of options for some interactive light shows. Adafruit has quite a few example projects for this board, mainly staying in the music/audio realm. They have drum machines, beat sequencers, and synth boards, to name a few. I was more interested in the interactive light component though, and eventually came up with a relatively simple idea: Make a Game of Life clone. The board could be powered on and left as a fun little interactive art piece in my apartment (I need more techy art, really).
