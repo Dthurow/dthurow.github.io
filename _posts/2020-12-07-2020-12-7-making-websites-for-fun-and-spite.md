@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Making Websites for Fun and Spite
+slug: making-websites-for-fun-and-spite
 categories:
 - side project
 - technical write up

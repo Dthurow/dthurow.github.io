@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Game of Life on the NeoTrellis M4 Express
+slug: game-of-life-on-the-neotrellis-m4-express
 categories:
 - side project
 - technical write up
@@ -23,6 +24,8 @@ Once upon a time, I was subscribed to Adabox (
 
 I’ve recently decided to finally unbox some that I haven’t touched yet, and decided the first one I’d try is the Adabox 10 (
 [https://learn.adafruit.com/adabox010/unboxing-adabox-010](https://learn.adafruit.com/adabox010/unboxing-adabox-010/)). This box comes with the Adafruit NeoTrellis M4, a fun dev board designed to light up and make some noise. The unique things about it are a 4 by 8 selection of neopixels (programmable LEDs) that can also function as buttons, as well as a lot of audio components that let it play audio samples and transform the audio on the fly. This gives you a lot of options for some interactive light shows. Adafruit has quite a few example projects for this board, mainly staying in the music/audio realm. They have drum machines, beat sequencers, and synth boards, to name a few. I was more interested in the interactive light component though, and eventually came up with a relatively simple idea: Make a Game of Life clone. The board could be powered on and left as a fun little interactive art piece in my apartment (I need more techy art, really).
+
+If you want to watch a video of the neotrellis in action, I created a video on [youtube](https://www.youtube.com/watch?v=CzRestavgvU)
 
 
  

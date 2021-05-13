@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Microcorruption War Game (levels 1-8)
+slug: microcorruption-war-game-levels-1-8
 categories:
 - CTF writeup
 - Assembly

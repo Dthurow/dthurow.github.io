@@ -1,6 +1,7 @@
 ---
 layout: post
 title: 32-bit Assembly on a 64-bit Linux machine
+slug: 32-bit-assembly-on-a-64-bit-linux-machine
 categories:
 - How-to
 - Assembly

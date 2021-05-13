@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Azure App Services and SQLLite3
+slug: azure-app-services-and-sqllite3
 categories: []
 tags: []
 status: publish

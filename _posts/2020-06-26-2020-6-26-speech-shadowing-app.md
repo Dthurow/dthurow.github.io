@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Speech Shadowing App
+slug: speech-shadowing-app
 categories:
 - side project
 tags:

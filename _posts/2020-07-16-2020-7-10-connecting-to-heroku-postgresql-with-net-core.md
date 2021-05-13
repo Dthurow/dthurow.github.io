@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Connecting to Heroku Postgresql with .Net Core
+slug: connecting-to-heroku-postgresql-with-net-core
 categories:
 - technical write up
 - How-to

@@ -1,6 +1,7 @@
 ---
 layout: post
 title: ".NET MVC Html.AntiForgeryToken and its side-effects"
+slug: net-mvc-htmlantiforgerytoken-and-its-side-effects
 categories:
 - technical write up
 tags:

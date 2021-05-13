@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Running .Net Core in Heroku
+slug: running-net-core-in-heroku
 categories:
 - technical write up
 tags:

@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Halloween 2018 - Cyberpunk Hacker
+slug: cyberpunk-hacker-costume
 categories:
 - side project
 tags:

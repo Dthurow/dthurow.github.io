@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Netgear DM 200 Modem Breakdown - The Software Side
+slug: netgear-dm-200-modem-breakdown-the-software-side
 categories:
 - technical write up
 - side project

@@ -1,6 +1,7 @@
 ---
 layout: post
 title: The Grid by Gretchen Bakke – book report
+slug: the-grid-by-gretchen-bakke-book-report
 categories:
 - book report
 tags:

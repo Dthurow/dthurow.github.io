@@ -1,6 +1,7 @@
 ---
 layout: post
 title: CanSecWest Review
+slug: cansecwest-review
 categories:
 - Conference
 - Review

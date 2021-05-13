@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Practicing my Japanese with a Kana Reading app
+slug: practicing-my-japanese-with-a-kana-reading-app
 categories:
 - side project
 tags:

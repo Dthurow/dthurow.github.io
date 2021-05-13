@@ -1,6 +1,7 @@
 ---
 layout: post
 title: 'WarGames: Learning hacking (security) the fun way'
+slug: wargames-learning-hacking-security-the-fun-way
 categories:
 - Talk Write Up
 tags:

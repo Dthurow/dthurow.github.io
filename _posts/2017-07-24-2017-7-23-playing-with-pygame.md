@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Playing with Pygame
+slug: playing-with-pygame
 categories:
 - side project
 tags:

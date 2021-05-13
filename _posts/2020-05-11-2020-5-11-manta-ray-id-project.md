@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Manta Ray ID Project
+slug: manta-ray-id-project
 categories:
 - side project
 - Freelance

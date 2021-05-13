@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Taking Things Apart For fun and ... well, mainly fun
+slug: taking-things-apart-for-fun-and-well-mainly-fun
 categories:
 - side project
 tags:

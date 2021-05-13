@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Having a Bash - With OverTheWire Bandit Wargame
+slug: having-a-bash-with-overthewire-bandit-wargame
 categories:
 - CTF writeup
 tags:

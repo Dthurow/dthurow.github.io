@@ -1,6 +1,7 @@
 ---
 layout: post
 title: BSides Vancouver Review
+slug: bsides-vancouver-review
 categories:
 - Conference
 - Review

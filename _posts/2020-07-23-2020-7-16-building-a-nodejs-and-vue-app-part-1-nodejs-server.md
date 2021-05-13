@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Building a NodeJS and Vue App - part 1 Node.js server
+slug: building-a-nodejs-and-vue-app-part-1-nodejs-server
 categories:
 - technical write up
 tags:
