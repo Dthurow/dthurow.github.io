@@ -34,17 +34,25 @@ In my spare time, I play with infosec, reverse engineering, learning Japanese, a
 
 ### Ongoing
 
+#### Security
+
 Attended multiple Webinars by Wild West Hackin’ Cast 
 * Intro to OT(Operational Technology) 1 hour webinar 
 * Intro to Linux Forensics Logs 1 hour webinar  
 * SOC Core Skills 16 hour webinar
 
-Embedded systems learning
-* [Reverse engineer a Modem]({% post_url 2021-02-23-2021-2-23-netgear-dm-200-modem-breakdown-the-software-side %})
+#### Embedded systems
+
+* Programmed an ATmega328p from an Arduino Uno, without using the Arduino ecosystem
+    * [Taking it off the Uno and using a programmer]({% post_url 2021-05-25-directly-programming-an-atmega328p-from-an-arduino-uno %})
+    * [Getting rid of the Arduino IDE]({% post_url 2021-06-08-programming-an-atmega328p-without-the-arduino-ide %})
+* Did some intro reverse engineering of a modem 
+    * [Explored the software]({% post_url 2021-02-23-2021-2-23-netgear-dm-200-modem-breakdown-the-software-side %})
+    * [Found test ports and got a serial command line with bus pirate]({% post_url 2021-05-13-netgear-dm-200-modem-breakdown-the-hardware-side %})
 * [Created an interactive game of life with a neotrellis]({% post_url 2020-09-01-2020-9-1-game-of-life-on-the-neotrellis-m4-express %})
 * [Took apart a printer and replaced a nintendo switch joystick]({% post_url 2020-09-10-2020-9-10-taking-things-apart-for-fun-and-well-mainly-fun %})
 
-Web technologies
+#### Web technologies
 * [Learned Node.js]({% post_url 2020-07-23-2020-7-16-building-a-nodejs-and-vue-app-part-1-nodejs-server %})
 * [Created a working docker file to run .NET Core on heroku]({% post_url 2020-07-09-2020-7-9-running-net-core-in-heroku %})
 

@@ -13,6 +13,25 @@ meta: {}
 
 This page includes a bunch of different websites, books, videos, etc. that I've found useful in my quest for knowledge and cool stuff. Perhaps it will help you too. They're (roughly) sorted by areas of interest.
 
+## Embedded Systems
+
+Intro to embedded systems:
+
+* [https://embedded.fm/blog/ese101](https://embedded.fm/blog/ese101) Walks through some intro to embedded software engineering
+* [https://github.com/nathancharlesjones/Embedded-for-Everyone/wiki](https://github.com/nathancharlesjones/Embedded-for-Everyone/wiki) A compendium of the best microcontrollers for people interested in embedded systems, in a friendly manner
+
+Newsletters:
+* [https://interrupt.memfault.com/](https://interrupt.memfault.com/)
+* [http://www.ganssle.com/](http://www.ganssle.com/)
+
+Courses
+* [https://www.udemy.com/course/unit-testing-and-other-embedded-software-catalysts/](https://www.udemy.com/course/unit-testing-and-other-embedded-software-catalysts/?couponCode=SURLY-MAY21) intro to unit testing embedded systems
+* [http://users.ece.utexas.edu/~valvano/Volume1/E-Book/](http://users.ece.utexas.edu/~valvano/Volume1/E-Book/) online e-book for an edX course
+
+Books
+* Making Embedded Systems by Elicia white, the person who runs the embedded.fm podcast [https://www.oreilly.com/library/view/making-embedded-systems/9781449308889/](https://www.oreilly.com/library/view/making-embedded-systems/9781449308889/)
+* There are no electrons: Electronics for Earthlings by Kenn Amdahl. Fun analogies with serious technical background [https://www.goodreads.com/book/show/304551.There_Are_No_Electrons](https://www.goodreads.com/book/show/304551.There_Are_No_Electrons)
+
 ##  Security
 
 
