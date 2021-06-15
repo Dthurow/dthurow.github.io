@@ -12,7 +12,9 @@ status: publish
 type: post
 published: true
 ---
-Now that I've dipped my toes into the microcontroller world, lets cannonball in with the world of STM32 microcontrollers. There's a _ton_ of different microcontrollers that are all STM32, but I'll be starting with a relatively easy starting microcontroller. It's easy because it comes on a cheap development board. I'm talking about the We Act Studio's STM32F411 dev board, nicknamed the "Black Pill". The company that makes STM32 microcontrollers is called STMicroelectronics (Though later in this post I'll just refer to them as ST)and they have developed a lot of software and support for the STM32, so hopefully, it'll be a pretty easy process to ge the toolchain set up.
+Now that I've dipped my toes into the microcontroller world, lets cannonball in with the world of STM32 microcontrollers. There's a _ton_ of different microcontrollers that are all STM32, but I'll be starting with a relatively easy starting microcontroller. It's easy because it comes on a cheap development board that doesn't require any custom PCB work, and it has a funny nickname. I'm talking about the We Act Studio's STM32F411 dev board, nicknamed the "Black Pill". It lets me start figuring out the embedded toolchain immediately, without having to dive too deep into the hardware side. Though I'll still be looking at schematics, since they're important and it's good practice.
+
+The company that makes STM32 microcontrollers is called STMicroelectronics, though later in this post I'll just refer to them as ST. And happily, they have developed a lot of software and support for the STM32, so hopefully, it'll be a pretty easy process to ge the toolchain set up.
 
 
 Going back to the Embedded For Everyone wiki [https://github.com/nathancharlesjones/Embedded-for-Everyone/wiki/1.-Getting-to-%22Blinky%22-with-a-new-MCU](https://github.com/nathancharlesjones/Embedded-for-Everyone/wiki/1.-Getting-to-%22Blinky%22-with-a-new-MCU), there's a nice graphic that shows all parts of an embedded system toolchain. AKA all the bits needed to actually program and debug a microcontroller. I annotated it with what I'm going to use, to give kind of an overview of my whole toolchain.
@@ -35,8 +37,10 @@ Lets go a little more in-depth about these pieces.
 ### The Hardware Side
 There's apparently a lot of places to get the hardware side, and for relatively cheap. But a lot of the places seem to be "Aliexpress" and "Ebay", and it feels like the quality control and speed of delivery for those both can be lacking. So instead, since I buy so much from Adafruit anyway, I decided to get my software from there. 
 
-ST-link V2 from adafruit: [https://www.adafruit.com/product/2548](https://www.adafruit.com/product/2548)
-We Act Studio STM32F411 "BlackPill" Development Board [https://www.adafruit.com/product/4877](https://www.adafruit.com/product/4877)
+As I mentioned above, I only need two bits of hardware, the black pill itself, and the debugger/programmer ST-link. The ST-link even comes with the right female-to-female jumper wires so I can connect the two together.
+
+- ST-link V2 from adafruit: [https://www.adafruit.com/product/2548](https://www.adafruit.com/product/2548)
+- We Act Studio STM32F411 "BlackPill" Development Board [https://www.adafruit.com/product/4877](https://www.adafruit.com/product/4877)
 
 ### The Software Side
 
@@ -46,9 +50,9 @@ I'm using the STM32Cube IDE, which is nice because it's all in one package to do
 ### The Code
 
 
-### Sending Code
 
-Final code for a simple blinky using the STM32CubeIDE with the We Act STM32F411 "black pill":
+
+**Final code** for a simple blinky using the STM32CubeIDE with the We Act STM32F411 "black pill":
 
 {% highlight c %}
  while (1)
@@ -64,3 +68,10 @@ Final code for a simple blinky using the STM32CubeIDE with the We Act STM32F411 
 {% endhighlight %}
 
 Note that I'm setting pin 13 to 0 to turn it ON, and 1 to turn it OFF. If you don't believe me, try changing the delay after the first `WritePin` to `5000` and see if it stays on or off longer. This is a result of how the LED is wired on the black pill board. If you look at the schematics for the board, you can see that the LED circuit is actually connected to 3.3 volts, then a resistor, then the LED, then PC13. This means when PC13 is low (set to `0`), it acts as ground, and the 3.3 volts move through the circuit. 
+
+![screenshot of the We Act Black Pill schematic, specifically the LED circuit attached to pin 13](/assets/getting-started-with-stm32-black-pill-getting-blinky/black pill LED schematic.png)
+
+This is a screenshot of the schematic diagram that adafruit gives here: [https://cdn-shop.adafruit.com/product-files/4877/4877_schematic-STM32F411CEU6_WeAct_Black_Pill_V2.0.pdf](https://cdn-shop.adafruit.com/product-files/4877/4877_schematic-STM32F411CEU6_WeAct_Black_Pill_V2.0.pdf). It shows two LEDs, one is the power LED, and one is the user-controlled LED on pin 13. 
+
+### Sending Code
+
