@@ -37,7 +37,7 @@ plugins:
   - jekyll-feed
 markdown: kramdown
 highlighter: rouge
-google_analytics: G-7SMQ748J38
+google_analytics: G-1L2T8RB5GH
 
 # Exclude from processing.
 # The following items will not be processed, by default.
