@@ -35,9 +35,13 @@ theme: minima
 show_excerpts: true
 plugins:
   - jekyll-feed
+  - jekyll-toc
 markdown: kramdown
 highlighter: rouge
 google_analytics: G-1L2T8RB5GH
+
+toc:
+  min_level: 2 # default: 1
 
 # Exclude from processing.
 # The following items will not be processed, by default.

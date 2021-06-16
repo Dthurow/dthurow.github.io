@@ -12,7 +12,10 @@ status: publish
 type: post
 published: true
 excerpt_separator: <!--more-->
+toc: true
 ---
+
+
 Now that I have an AVR programmer and the ATmega328p on its own breadboard (as I documented [here]({%post_url 2021-05-25-directly-programming-an-atmega328p-from-an-arduino-uno %})), I want to remove my dependence on the Arduino IDE download. So no more using tools that arduino IDE downloaded for me! My rough plan is as follows:
 
 1. pick a different IDE for writing my code

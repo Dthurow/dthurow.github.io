@@ -12,7 +12,9 @@ status: publish
 type: post
 published: true
 excerpt_separator: <!--more-->
+toc: true
 ---
+
 
 So Arduino's brains is a ATmega328p microcontroller. On the standard Arduino Uno, it comes as a chip that you can remove from the board, so if you fry it on accident, you can replace just the chip instead of the whole board. So is it possible to remove all the stuff Arduino gives you, take just the chip, and directly program the ATmega328p? 
 

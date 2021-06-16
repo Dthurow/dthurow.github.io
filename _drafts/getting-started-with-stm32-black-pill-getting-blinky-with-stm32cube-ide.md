@@ -11,10 +11,13 @@ tags:
 status: publish
 type: post
 published: true
+toc: true
 ---
+
 Now that I've dipped my toes into the microcontroller world, lets cannonball in with the world of STM32 microcontrollers. There's a _ton_ of different microcontrollers that are all STM32, but I'll be starting with a relatively easy starting microcontroller. It's easy because it comes on a cheap development board that doesn't require any custom PCB work, and it has a funny nickname. I'm talking about the We Act Studio's STM32F411 dev board, nicknamed the "Black Pill". It lets me start figuring out the embedded toolchain immediately, without having to dive too deep into the hardware side. Though I'll still be looking at schematics, since they're important and it's good practice.
 
 The company that makes STM32 microcontrollers is called STMicroelectronics, though later in this post I'll just refer to them as ST. And happily, they have developed a lot of software and support for the STM32, so hopefully, it'll be a pretty easy process to ge the toolchain set up.
+
 
 
 Going back to the Embedded For Everyone wiki [https://github.com/nathancharlesjones/Embedded-for-Everyone/wiki/1.-Getting-to-%22Blinky%22-with-a-new-MCU](https://github.com/nathancharlesjones/Embedded-for-Everyone/wiki/1.-Getting-to-%22Blinky%22-with-a-new-MCU), there's a nice graphic that shows all parts of an embedded system toolchain. AKA all the bits needed to actually program and debug a microcontroller. I annotated it with what I'm going to use, to give kind of an overview of my whole toolchain.
