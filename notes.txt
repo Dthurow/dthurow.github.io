@@ -1,0 +1,7 @@
+Command to erase exif data from images in current directory:
+
+~/Documents/CLI\ tools/Image-ExifTool-12.25/exiftool -EXIF= -tagsfromfile @ -exif:Orientation .
+
+This keeps the orientation data but removes all the other bits
+
+NOTE: This creates new copies with the same name, and re-labels the old one with _original at the end of the filename
