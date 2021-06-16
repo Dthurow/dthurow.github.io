@@ -40,7 +40,7 @@ Lets go a little more in-depth about these pieces.
 ### The Hardware Side
 There's apparently a lot of places to get the hardware side, and for relatively cheap. But a lot of the places seem to be "Aliexpress" and "Ebay", and it feels like the quality control and speed of delivery for those both can be lacking. So instead, since I buy so much from Adafruit anyway, I decided to get my software from there. 
 
-As I mentioned above, I only need two bits of hardware, the black pill itself, and the debugger/programmer ST-link. The ST-link even comes with the right female-to-female jumper wires so I can connect the two together. 
+As I mentioned above, I only need two bits of hardware, the black pill itself, and the debugger/programmer ST-link. The ST-link even comes with the right female-to-female jumper wires so I can connect the two together. Below are the links to adafruit for the hardware I had to order.
 
 - ST-link V2 from adafruit: [https://www.adafruit.com/product/2548](https://www.adafruit.com/product/2548)
 - We Act Studio STM32F411 "BlackPill" Development Board [https://www.adafruit.com/product/4877](https://www.adafruit.com/product/4877)
@@ -49,9 +49,9 @@ Once I got them, I need to connect them together. The black pill from adafruit c
 
 ![black pill PCB attached to a third hand tool to keep it steady while I solder. The SWD header is put into the board, and has 4 wires connected to it](/assets/getting-started-with-stm32-black-pill-getting-blinky-with-stm32cube-ide/soldering headers.jpg)
 
-I used my third hand to keep the board and SWD header pins steady while I soldered it up. I also attached the female jumper wires to the SWD pins, to make sure I didn't solder the pins too close to the PCB board. After I did this, I soldered on the headers that run down each side of the black pill, and used the trick of attaching it to a breadboard, so the pins are properly straight while I solder.
+I used my third hand to keep the board and SWD header pins steady while I soldered it up. I also attached the female jumper wires to the SWD pins, to make sure I didn't solder the pins too close to the PCB board. After I this, I soldered on the headers that run down each side of the black pill, and used the trick of attaching it to a breadboard, so the pins are properly straight while I solder.
 
-With the pins all on, I need to connect the st-link and the black pill together! Happily, the st-link v2 has the pinout for its connections right on the hardware itself, so I don't need to lookup the pinouts online. The black pill has what each SWD header pin is connected to screenprinted on the board as well. So it's a matter of connecting the included female-to-female jumper cables to the correct pins on each. They each call the pins something slightly different, but it's pretty easy to guess which goes to which. Since this is a SWD communication, you just connect each pin that's named the same together. This is different than more tricky connections, like UART, which requires you to connect the Rx pin to the Tx of the other device and vice versa.
+With the pins all on, I need to connect the st-link and the black pill together. Happily, the st-link v2 has the pinout for its connections right on it's casing, so I don't need to lookup the pinouts online. The black pill has what each SWD header pin is connected to screenprinted on the board as well. So it's a matter of connecting the included female-to-female jumper cables to the correct pins on each. They each call the pins something slightly different, but it's pretty easy to guess which goes to which. Since this is SWD communication, you just connect each pin that's named the same together. This is different than more tricky connections, like UART, which requires you to connect the Rx pin to the Tx of the other device and vice versa.
 
 Here's a table of the pin connections from the Black pill to the st-link. They're in order for the black pill's pins from top to bottom if the SWD header is facing to the right. I list the wire color because that's helpful to track when you're connecting them together, but the wires are not different in any way beyond coloring.
 
@@ -74,7 +74,7 @@ I'm using the STM32Cube IDE, which is nice because it's all in one package to do
 
 I haven't used this IDE package much yet, so I can't give a recommendation on it one way or another. From what little I've done on it, it feels very much the classic "you can do everything here, but first you have to find the button for it" sort of IDE that's very popular. E.g. Visual Studio, Eclipse, Netbeans, that sort of thing. There's a lot of useful functionality, but it comes at the cost of complexity. 
 
-Also, because it's based on Eclipse, which is Java-based, it can be pretty hefty and a bit of a strain on your system. I've already had issues with it hanging on my laptop. I'm not sure if this is because I'm running the Linux version, and it's less supported than the windows/mac versions, or if it's a common symptom of the STM32Cube IDE in general. 
+Also, because it's based on Eclipse, which is Java-based, it can be pretty hefty and a bit of a strain on your system. I've already had issues with it hanging on my laptop. I'm not sure if this is because I'm running the Linux version, and it's less supported than the windows/mac versions, or if it's a common symptom of the STM32Cube IDE in general, or my computer just doesn't like linux. Regardless, I had to get a book out to read while the IDE thought about various steps in my intitial set-up.
 
 My eventual plan is to build out a more light-weight toolchain, potentially using docker to wrap all the dev tools up in one location. I liked the ATmega328p toolchain, that just used the compiler and avrdude to send to the chip, and I'd like to build out a similar toolchain for the black pill. But until then, let's move on to writing some code.
 
@@ -157,6 +157,6 @@ Finally, after a lot of set-up, we get blinky! The [Embedded For Everyone Wiki](
 
 ### Conclusion
 
-Hopefully if you're following along, at this point you'll have a working blinky example. If you want to continue with STM32Cube IDE and ST's HAL, this is the point where you start learning common HAL functions and building prototypes with it. I'm ambivalent about the HAL, but I frankly dislike the IDE. It feels like it's hiding too much of the nitty gritty. So my next steps will be attempting to get blinky with a different, hopefully simpler toolchain. 
+Hopefully if you're following along, at this point you'll have a working blinky example. If you want to continue with STM32Cube IDE and ST's HAL, this is the point where you start learning common HAL functions and building prototypes with it. You can also go back to the MCU configuration page and set more pins, like the external clock, and the user-controlled button. Now, I'm ambivalent about the HAL, but I frankly dislike the IDE. It feels like it's hiding too much of the nitty gritty. And it's repeated hanging while switching between the MCU configuration and the C code is an absolute deal-breaker. So my next steps will be attempting to get blinky with a different, hopefully simpler toolchain. 
 
 I'm also starting an embedded systems unit testing class on udemy, so I may also incorporate some testing frameworks in my next setup, since a project without tests is a side-project, not something for production. 
