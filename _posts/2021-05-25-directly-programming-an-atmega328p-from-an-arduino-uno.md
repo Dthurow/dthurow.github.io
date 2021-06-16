@@ -7,14 +7,17 @@ categories:
 - How-to
 tags:
 - side project
+- programming atmega328p
 status: publish
 type: post
 published: true
+excerpt_separator: <!--more-->
 ---
 
 So Arduino's brains is a ATmega328p microcontroller. On the standard Arduino Uno, it comes as a chip that you can remove from the board, so if you fry it on accident, you can replace just the chip instead of the whole board. So is it possible to remove all the stuff Arduino gives you, take just the chip, and directly program the ATmega328p? 
-Well I came across a youtube playlist recently that gives a resounding yes, yes you can. Mitch Davis' [Bare-Metal MCU playlist](https://www.youtube.com/playlist?list=PLNyfXcjhOAwOF-7S-ZoW2wuQ6Y-4hfjMR) walks you through taking all the helpful things Arduino gives you, and removing them one by one. This sort of content is *exactly* up my alley, and I realized I had an Uno kicking around, plus a sparkfun version of an Uno, a [sparkfun redboard](https://www.sparkfun.com/products/13975). Why not follow along?
 
+Well I came across a youtube playlist recently that gives a resounding yes, yes you can. Mitch Davis' [Bare-Metal MCU playlist](https://www.youtube.com/playlist?list=PLNyfXcjhOAwOF-7S-ZoW2wuQ6Y-4hfjMR) walks you through taking all the helpful things Arduino gives you, and removing them one by one. This sort of content is *exactly* up my alley, and I realized I had an Uno kicking around, plus a sparkfun version of an Uno, a [sparkfun redboard](https://www.sparkfun.com/products/13975). Why not follow along?
+<!--more-->
 So, using Mitch Davis' playlist as a basis, I decided to do the following:
 * Take my existing Redboard, make it into an ISP (In-circuit Serial Programmer).
 * Change the Fuse setting so the ATmega328p chip uses the internal clock instead of external
@@ -26,6 +29,7 @@ So, using Mitch Davis' playlist as a basis, I decided to do the following:
 
 >**NOTE:** that last step is non-optional when I'm playing with tech
 
+{% include series-index.html content="programming atmega328p" %}
 
 ## Making the redboard into an ISP
 This was shockingly easy! The Arduino IDE comes with Arduino ISP code in the Examples section by default. So all I had to do was connect my redboard to my computer, then send the ISP code from the Arduino IDE to my redboard just like normal, and voila, I now have a ISP. Neat!

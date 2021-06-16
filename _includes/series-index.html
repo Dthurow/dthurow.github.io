@@ -1,0 +1,22 @@
+<br/>
+
+***
+
+## This is a part of my series on {{include.content}}
+For more posts on this, see below
+  <ol>
+  {% assign relatedposts = site.tags[include.content] | reverse %}
+    {% for post in relatedposts %}
+      <li>
+      <a href="{{ post.url }}">{{ post.title }}</a>
+      {% if post.title == page.title %}
+      (You are Here)
+      {% endif %}
+      </li>
+
+    {% endfor %}
+  </ol>
+
+***
+
+<br/>

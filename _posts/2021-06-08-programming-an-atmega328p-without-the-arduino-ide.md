@@ -7,9 +7,11 @@ categories:
 - How-to
 tags:
 - side project
+- programming atmega328p
 status: publish
 type: post
 published: true
+excerpt_separator: <!--more-->
 ---
 Now that I have an AVR programmer and the ATmega328p on its own breadboard (as I documented [here]({%post_url 2021-05-25-directly-programming-an-atmega328p-from-an-arduino-uno %})), I want to remove my dependence on the Arduino IDE download. So no more using tools that arduino IDE downloaded for me! My rough plan is as follows:
 
@@ -18,7 +20,9 @@ Now that I have an AVR programmer and the ATmega328p on its own breadboard (as I
 1. download avr-gcc so I can compile my code
 1. download AVRdude so I can send my compiled code to the ATmega328p
 1. figure out if there's any other things I have to download or run?
+<!--more-->
 
+{% include series-index.html content="programming atmega328p" %}
 
 >**Note** - this is all done on an Ubuntu machine, so instructions are for linux, not windows
 

@@ -10,11 +10,14 @@ categories:
 tags:
 - side project
 - teardown
+- taking apart the netgear DM 200 modem
 type: post
 published: true
 ---
 
 Now that I’ve [poked around the software]({%post_url 2021-02-23-2021-2-23-netgear-dm-200-modem-breakdown-the-software-side %}) side of things on my DM 200 modem, it’s now time to poke some hardware!
+
+{% include series-index.html content="taking apart the netgear DM 200 modem" %}
 
 First things first, get the case open. Happily, there’s a very obvious screw on the back of the case, and a standard TR8 torx screwdriver removes it. The next bit was less obvious, but I had the openwrt website to help out. I used some picks from my ifixit repair kit to pop open the side of the case, and voila, the PCB was revealed. 
 

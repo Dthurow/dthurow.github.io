@@ -10,6 +10,7 @@ categories:
 tags:
 - side project
 - teardown
+- taking apart the netgear DM 200 modem
 status: publish
 type: post
 published: true
@@ -18,6 +19,8 @@ meta:
 ---
 
 Motivated by miscellany blog posts, I decided to try my hand at poking around an old modem I had lying around. 
+
+{% include series-index.html content="taking apart the netgear DM 200 modem" %}
 
 It’s a netgear DM200, ADSL/VDSL modem/router (I will be calling it either a router or modem in this blog post, depending on my mood). My plan is first do some recon and poking the software, without opening up or doing any hardware shenanigans. Once I have a grip on what’s happening, I’ll then open it up and see if I can do some lower-level reverse engineering. So let's get started!
 
