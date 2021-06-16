@@ -12,6 +12,7 @@ tags:
 status: publish
 type: post
 published: true
+toc: true
 meta: {}
 ---
 

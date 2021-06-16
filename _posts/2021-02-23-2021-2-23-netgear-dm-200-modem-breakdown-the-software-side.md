@@ -14,6 +14,7 @@ tags:
 status: publish
 type: post
 published: true
+toc: true
 meta:
   _thumbnail_id: '34'
 ---
