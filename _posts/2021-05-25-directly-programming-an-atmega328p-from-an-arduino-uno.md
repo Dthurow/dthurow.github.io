@@ -7,6 +7,7 @@ categories:
 - How-to
 tags:
 - side project
+- microcontroller
 - programming atmega328p
 status: publish
 type: post

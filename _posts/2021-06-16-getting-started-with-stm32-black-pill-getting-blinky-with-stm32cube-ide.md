@@ -8,6 +8,7 @@ categories:
 tags:
 - side project
 - microcontrollers
+- programming an stm32
 status: publish
 type: post
 published: true
