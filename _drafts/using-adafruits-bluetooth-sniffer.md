@@ -33,3 +33,6 @@ It has the following UID Unknown services
 https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_sniffer_ble%2FUG%2Fsniffer_ble%2Fsniffer_usage.html
 
 
+General bluetooth low energy info:
+https://www.bluetooth.com/bluetooth-resources/bluetooth-le-developer-starter-kit/
+https://www.bluetooth.com/specifications/specs/
