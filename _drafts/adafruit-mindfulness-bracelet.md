@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Creating a Mindfulness Bracelet with Adafruit - And Remembering the KISS Principle
+title: Mindfulness Bracelet, Learning Batteries, and Forgetting to KISS
 categories:
 - technical write up
 - side project
@@ -26,34 +26,236 @@ Or so I thought.
 
 ### The Plan
 
-Like I said, I wanted to keep it simple. I'd use the Adafruit project as a basis, but do some minor mods to make sure I actually understood what all was happening. I don't want to mindlessly follow instructions and get an end result I don't understand. The mods I wanted to do were simple:
+Like I said, I wanted to keep it simple. I'm a big believer in the KISS principle, aka Keep It Simple, Stupid. I'm partly a big proponent of it because I so often forget it myself. I decided to use the Adafruit project as a basis, but do some minor mods to make sure I actually understood what all was happening. I don't want to mindlessly follow instructions and get an end result I don't understand. The modifications I wanted to do were simple:
 
 1. **Change the wrist strap**
 I didn't really like the design of Adafruit's bracelet. It just wasn't my style, you know? So I bought a cheap nylon strap from my local hardware store. I'd just sew all the components onto it, and use the buckle it came with to attach to my arm. Simple wristband with a bunch of electronics on it seemed my style.
 1. **Use Coin cell batteries**
-Not only did I not have the battery they recommend, I also don't really like the concept of lipoly batteries attached to me unless they're in a rigid case. I don't want them bending too much and exploding while attached to me. I'm just funny that way. So instead I decided to try my coin cell batteries. They're much better in terms of size, less explode-y, and I even have sewable battery holders that would fit perfectly on the strap
+Not only did I not have the battery they recommend, I also don't really like the concept of lipoly batteries attached to me unless they're in a rigid case. I don't want them bending too much and exploding while attached. I'm just funny that way. So instead I decided to try my coin cell batteries. They're much better in terms of size, less explode-y, and I even have sewable battery holders that would fit perfectly on the strap
 > **Future Danielle Note** This causes problems later down the way. I'm not sure how Adafruit attaches their battery at the end, but it may be worth the work if you're trying to duplicate my work.
 1. **Add some code**
-I'm looking to learn more about embedded systems *programming*, not just how to solder or build circuits. Using only the pre-made code seems a bit cheat-y. I knew I could add some extra functionality pretty easily, and that'd let me practice my CircuitPython as well. A win-win.
+I'm looking to learn more about embedded systems *programming*, not just how to solder or build circuits. Using only the pre-made code seems a bit of a cheat. I knew I could add some extra functionality pretty easily, and that'd let me practice my CircuitPython as well. A win-win.
 
-### Hardware Requirements
+### Hardware Side
 
-### Software Requirements
+#### Gathering the hardware
+Adafruit lists required parts, and I mostly followed that (except for the modifications I list above). The final parts list is below.
+
+**Hardware Needed**
+- [Gemma M0](https://www.adafruit.com/product/3501)
+- [vibrating mini disc motor](https://www.adafruit.com/product/1201)
+- [1N4001 diode](https://www.adafruit.com/product/755)
+- [PN2222 NPN transistor](https://www.adafruit.com/product/756)
+- ~200-1K ohm resistor
+- 2 [CR2032 coin batteries](https://www.adafruit.com/product/654)
+- 2 [coin battery holders](https://www.adafruit.com/product/653)
+- [conductive thread](https://www.adafruit.com/product/640)
+- nylon strap roughly 1 inch wide
+- buckle for nylon strap
+
+**Tools Needed**
+- soldering iron and accessories
+- scissors
+- ruler
+- pen or marker
+- lighter for melting ends of the nylon strap
+
+
+#### Planning the Circuit
+I'm using the adafruit project as a base, but I wanted to understand what was actually happening. The adafruit project has images and text describing what circuit you need to make, but no actual circuit schematic. Walking through what was needed, I arrived at the below circuit:
+
+![Hand-drawn circuit diagram. Shows the Gemma's Vout pin connected to a diode and vibration motor in parallel, with the diode backwards. They connect to the collector side of a transistor. The transistor's base is connected to the A0 pin on the Gemma, via a resistor. The emitter side of the transistor is attached to Gemma's Ground pin. The Gemma also has a section labeld JST that connects to a batter, and it also has an A2 pin labeled as "cap button".](/assets/adafruit-mindfulness-bracelet/circuit_schematic.jpg)
+
+It's relatively simple. The motor connects to the the Vout pin, which is always the max voltage the battery or USB can give, then to a transistor, then to ground. The transistor is acting as a switch. Its base is connected to A0, which will be controlled by the code. When A0 is high, it'll "connect the switch" aka let the transistor connect the Vout to ground, causing electricity to flow through the motor and vibrate. The JST bit is the JST connector on the Gemma. I'll use that to connect to my coin cell batteries, and it'll be the power when the bracelet is on my wrist. The "cap button" is the A2 pin, which I'll use as a capacitive button, allowing me to cycle through the time between vibrations. 
+
+>**Future Danielle note**: all of my planning writeups have 3.3V as the battery voltage. This is incorrect, as I explain later, but the rest is correct to the best of my knowledge
+
+You'll also see that diode sitting around, and it's going the wrong way, to boot! I had to google around some to find a good answer for that, which I found at the [Learning about Electronics website](http://www.learningaboutelectronics.com/Articles/Vibration-motor-circuit.php):
+
+>When driving a motor with a microcontroller such as the arduino we have here, it is important to connect a diode reverse biased in parallel to the motor. This is also true when driving it with a motor controller or transistor. The diode acts as a surge protector against voltage spikes that the motor may produce. The windings of the motor notoriously produce voltage spikes as it rotates. Without the diode, these voltages could easily destroy your microcontroller, or motor controller IC or zap out a transistor.
+
+So that prevents accidentally killing the Gemma, which I aprove of.
+
+Now that I have a circuit planned, I have to figure out how to orient all the parts on the physical bracelet. I did a lot of drawing, but finally settled on a set up. Going from one side of the bracelet to the other, I'd have the vibration circuit, then the gemma, then the batteries. This way, I could have the vibration happen on the inside of my wrist, the gemma would be centered on the back of my wrist like a watch face, and the batteries would be out of the way of everything else.
+
+The drawn version of what I mean:
+![Drawing of the organization of the bracelet as explained above](/assets/adafruit-mindfulness-bracelet/drawing_orientation_of_circuit_on_bracelet.jpg)
+
+#### Putting Things Together
+
+This process is mainly where I remembered I don't actually like hand-sewing that much, even though I can do it. There's not much to say here, beyond I was simply following my planning, so this section is just a series of pictures of my work.
+
+First step, I attach the Gemma to the nylon strap. I wanted to have it centered on the strap, so I put in two sewing pins to indicate where I wanted the gemma while the strap was on my wrist, then used those as reference when I sewed it on.
+![black nylon strap with the gemma on it, there is black thread coming from the bracelet, attached to a sewing needle. There are two sewing pins on either side of the gemma](/assets/adafruit-mindfulness-bracelet/bracelet_adding_gemma.jpg)
+
+Now that it was on, I could orient the vibration circuit in the correct location and make sure my drawing was accurate:
+![black nylon strap with gemma on it. The strap is on a table going up and down the frame. below the gemma is the vibration circuit, laid out but not connected](/assets/adafruit-mindfulness-bracelet/bracelet_with_circuit_partially_on.jpg)
+
+I then soldered together the vibration circuit:
+![Image of the vibration motor, diode, transistor, and resistor all soldered together](/assets/adafruit-mindfulness-bracelet/just_vibe_circuit.jpg)
+
+Everything seemed good for the vibration circuit, but before I spent too much time on that, I wanted to make sure the battery set-up would work. The battery holder is a bit too wide to fit crosswise on the strap, but I didn't want it to go lengthwise because it would flatten out the nylon strip and make it harder to wrap around my wrist. So I ended up bending the connectors on the battery holder down, and then sewing it on crosswise. It's still a bit bigger than I wanted, but it works!
+
+The bent clips on the battery holder:
+![side view of the sewable battery holder. The leads are bent down so they are flush with the edges of the battery holder, instead of at 90 degrees](/assets/adafruit-mindfulness-bracelet/battery_holder_with_bent_clips.jpg)
+
+And this is with the sewn on battery holder and connection to the Gemma. You'll note I'm only using one cell battery, when my hardware lists 2. Again, I'll get to that in a bit. This is one of the places where I used my conductive thread! So instead of soldering the JST leads directly to the battery holder, I sewed the leads onto the strap, then used the conductive thread to attach to the battery. As a bonus, the thread helped the battery holder stay secure.
+![black nylon bracelet with the gemma sewn on, and above it, the battery holder sewn on the strap crosswise](/assets/adafruit-mindfulness-bracelet/bracelet_with_battery_and_gemma.jpg)
+
+Lastly, I sew the vibration circuit onto the strap, and it's completed!
+![nylon strap with all pieces sewn onto it](/assets/adafruit-mindfulness-bracelet/bracelet_completed_with_one_battery.jpg)
+
+And a view on my wrist:
+![nylon strap is now on my left wrist, you can see the Gemma on the back of my wrist, with the vibration circuit on the inside of my wrist](/assets/adafruit-mindfulness-bracelet/bracelet_complete_on_wrist.jpg)
+
+Now I'm ready to make it do stuff!
+
+### Software Side
 
 The basic version of the software is available on the project page here: [https://learn.adafruit.com/buzzing-mindfulness-bracelet/circuitpython-code](https://learn.adafruit.com/buzzing-mindfulness-bracelet/circuitpython-code). But where's the fun of leaving things so simple! Let's do some mods. 
 
+>**Future Danielle note**: This is a good example of me forgetting the KISS principle - **K**eep **I**t **S**imple, **S**tupid. While troubleshooting, I had to revert to the simpler version of the software repeatedly, because I didn't fully understand the hardware side
+
 The simplest change is allowing users to change how long the Gemma waits between vibrations. There isn't an easy way to let users type in a given number of minutes, but there are some capacitive touch buttons you can use. So I added the ability to cycle through a collection of times: 1 minute, 5 minutes, 10 minutes, and an hour. I attached cycling through these options to the Pad #0/A2 on the Gemma, setup as a capacitive touch button. And when the user changes the timing, they need to know what timing they've changed it to, so I need to inform the end user somehow. 
 
-need to include libraries from: https://learn.adafruit.com/adafruit-gemma-m0/circuitpython-libraries
+need to include libraries from: [https://learn.adafruit.com/adafruit-gemma-m0/circuitpython-libraries](https://learn.adafruit.com/adafruit-gemma-m0/circuitpython-libraries)
+
+#### Minimizing Sleep()
+
+#### Final Code
+
+    # Mindfulness Bracelet sketch for Adafruit Gemma.  Briefly runs
+    # vibrating motor (connected through transistor) at regular intervals.
+
+    import time
+    import board
+    from digitalio import DigitalInOut, Direction
+    from analogio import AnalogOut
+    from touchio import TouchIn
+    import adafruit_dotstar
+
+    debug = False
+
+    #turn off the dotstar
+    dotstar = adafruit_dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1)
+    dotstar.brightness = 0
+    dotstar.fill((0, 0, 255))
+
+    # vibrating disc mini motor disc connected on D2
+    #use as an analog out so can control how much the motor vibrates
+    vibrating_disc = AnalogOut(board.A0)
+    # quarter power: 16384
+    # half power: 32768
+    # full power: 65535
+    # NOTE: the vibration amount depends on voltage in. If powered by USB,
+    # quarter power is about right. If powered by a single 3V watch battery, 
+    # full power is the way to go
+    vibrating_disc_on_value = 65535
 
 
-Use troubleshooting to determine dotstar info: https://learn.adafruit.com/adafruit-gemma-m0/troubleshooting 
+    # Built in red LED
+    led = False
+    if debug:
+        led = DigitalInOut(board.D13)
+        led.direction = Direction.OUTPUT
 
-Use this to connect with repl and see error: https://learn.adafruit.com/welcome-to-circuitpython/advanced-serial-console-on-mac-and-linux
+    # Capacitive touch on A2
+    touch2 = TouchIn(board.A2)
 
-screen /dev/ttyACM0 115200
+    on_time = 1     # Vibration motor run time, in seconds
+    interval = 5   # Time between reminders, in seconds
+    intervalArray = [60, 300, 600, 3600] #interval options user can choose from
+    intervalIndex = 1
+    timesToTellUserAboutTiming = 0
+    newTimingColor = (0, 0, 255)
+
+    # Updates the number of flashes it needs to display to tell the user
+    # how many minutes between vibrations it has just been set to
+    # does not actually flash the LED in this function, instead uses tellUserNewTiming()
+    # to avoid sleeping and potentially missing more input and/or time to vibrate
+    def setNewTiming():
+        global interval, timesToTellUserAboutTiming, newTimingColor
+        interval = intervalArray[intervalIndex]
+        timeInMinutes = interval/60
+        newTimingColor = (0, 0, 100) # blue
+        
+        timesToTellUserAboutTiming = timeInMinutes
+        
+        if timeInMinutes >= 60:
+            timesToTellUserAboutTiming = timeInMinutes / 60
+            newTimingColor = (0, 100, 0) # green
+        time.sleep(.3) #make sure it's clear a new time is being set
+
+    # Checks if the dotstar still needs to flash to tell user about a newly set time interval
+    # between vibrations. If there's still flashes needed, it will flash and sleep
+    def tellUserNewTiming():
+        global timesToTellUserAboutTiming
+        if (timesToTellUserAboutTiming > 0):
+            #turn on for a short time
+            dotstar.brightness = .2
+            dotstar.fill(newTimingColor)
+            time.sleep(.25)
+            #turn off for a short time
+            dotstar.brightness = 0
+            dotstar.fill(newTimingColor)
+            time.sleep(.25) 
+            timesToTellUserAboutTiming -= 1 
+            
+
+    def initialSetup():
+        #buzz some so you know it's awake!
+        vibrating_disc.value = vibrating_disc_on_value
+        time.sleep(.10)
+        vibrating_disc.value = 0
+        time.sleep(.10)
+        vibrating_disc.value = vibrating_disc_on_value
+        time.sleep(.10)
+        vibrating_disc.value = 0
+        time.sleep(.10)
+        setNewTiming()
+
+
+    initialSetup()
+    interval = intervalArray[intervalIndex]
+
+    start_time = time.monotonic()
+
+    while True:
+        timer = time.monotonic() - start_time
+
+        if timer >= interval and timer <= (interval + on_time):
+            vibrating_disc.value = vibrating_disc_on_value
+            if debug:
+                led.value = True
+        elif timer >= (interval + on_time):
+            vibrating_disc.value = 0
+            if debug:
+                led.value = False
+            start_time = time.monotonic()
+
+        # use A2 as capacitive touch to cycle through interval options
+        if touch2.value:
+            intervalIndex = (intervalIndex + 1) % len(intervalArray)
+            setNewTiming()
+
+        tellUserNewTiming()
+        
+
+
+
+
+
+#### Troubleshooting Software
+Partway through my development, I somehow managed to reset the Gemma completely. It removed my code and libraries, and set it back to the default example it shipped with. I have no idea why. But happily (kind of),that meant I got to learn how to troubleshoot the Gemma some!
+
+Use troubleshooting to determine dotstar info: [https://learn.adafruit.com/adafruit-gemma-m0/troubleshooting](https://learn.adafruit.com/adafruit-gemma-m0/troubleshooting) 
+
+Use this to connect with repl and see error:[https://learn.adafruit.com/welcome-to-circuitpython/advanced-serial-console-on-mac-and-linux](https://learn.adafruit.com/welcome-to-circuitpython/advanced-serial-console-on-mac-and-linux)
+
+`screen /dev/ttyACM0 115200`
 
 Error was:
+
     main.py output:
     Traceback (most recent call last):
     File "main.py", line 9, in <module>
@@ -70,25 +272,25 @@ added dotstar library, now error:
 added pypixelbuf library, code now works
 
 
-### Initial Test
+### Putting it all together
 
 It broke :(
 
-### Understanding Battery Calculations
+### Aside: Understanding Battery Calculations
 
 I haven't had much reason to learn battery calculations, aka figuring out what type of battery I need and how long they'll last. I was a web developer previously, if your laptop dies while you're looking at my site, that's a you problem. But now, it was very much my problem!
 
-Initially I had only one coin battery on it, but that didn't work, leading to brownouts. I figure I need more juice, because the USB works fine. After double checking the adafruit docs, it turns out it needs 4-6 Volts.But one coin battery is 3.3. Why does the initial project have a 3.7V battery? No idea. But let's see if I can hack something together. I remember you can increase voltage by connecting batteries...somehow. Some googling proved I can connect two coin batteries in series to increase the voltage amount: https://www.power-sonic.com/blog/how-to-connect-batteries-in-series-and-parallel/. I do this by connecting the negative terminal on one to positive of the other. The free positive and free negative attach to the microcontroller. I used the multimeter to check the voltage before I connect to the microcontroller, and it was 5.98V, which was perfect! I gave it a whirl, and it works! But the thing is, I wasn't entirely sure why. I googled around more, but only got more confused.
+Initially I had only one coin battery on it, but that didn't work, leading to brownouts. I figure I need more juice, because the USB works fine. After double checking the adafruit docs, it turns out it needs 4-6 Volts.But one coin battery is 3.3. Why does the initial project have a 3.7V battery? No idea. But let's see if I can hack something together. I remember you can increase voltage by connecting batteries...somehow. Some googling proved I can connect two coin batteries in series to increase the voltage amount: [https://www.power-sonic.com/blog/how-to-connect-batteries-in-series-and-parallel/](https://www.power-sonic.com/blog/how-to-connect-batteries-in-series-and-parallel/). I do this by connecting the negative terminal on one to positive of the other. The free positive and free negative attach to the microcontroller. I used the multimeter to check the voltage before I connect to the microcontroller, and it was 5.98V, which was perfect! I gave it a whirl, and it works! But the thing is, I wasn't entirely sure why. I googled around more, but only got more confused.
 
 I took to the local makerspace's slack, and got some lovely people to explain the concepts to me. After talking through my project and some general guidelines for calculating battery things, I came out with the following.
 
-For figuring out voltage needed, I go through all the parts in my circuit and figure out their voltage range (i.e. look at the docs). I then make sure the voltage I provide is either inside the range of all parts, or add a part that changes the voltage before it gets to the sensitive bits, so nothing blows up.
+**For figuring out voltage needed** I go through all the parts in my circuit and figure out their voltage range (i.e. look at the docs). I then make sure the voltage I provide is either inside the range of all parts, or add a part that changes the voltage before it gets to the sensitive bits, so nothing blows up.
 
-For figuring out how long the batteries last for a circuit I haven't built yet, I'd take all power-hungry parts in the circuit, add up their current usage, make sure it's the same units as the battery's hour unit (e.g. make sure it's mA if the battery has 200mAh), and divide the mAh by the summed up mA (plus a bit for fudge factor), and that gives me a rough time it'll live.
+**For figuring out how long the batteries last for a circuit I haven't built yet** I'd take all power-hungry parts in the circuit, add up their current usage, make sure it's the same units as the battery's hour unit (e.g. make sure it's mA if the battery has 200mAh), and divide the mAh by the summed up mA (plus a bit for fudge factor), and that gives me a rough time it'll live.
 
-For figuring out how long the batteries last for a circuit I have built, use a multimeter in series with the circuit, make sure I use the right setting to prevent tripping the fuse, and it'll show me the current current (har har) usage. Then divide the battery mAh by the current I see on the multimeter, and I get the rough time it'll live.
+**For figuring out how long the batteries last for a circuit I have built** use a multimeter in series with the circuit, make sure I use the right setting to prevent tripping the fuse, and it'll show me the current current (har har) usage. Then divide the battery mAh by the current I see on the multimeter, and I get the rough time it'll live.
 
-### Battery Calculations
+#### Battery Calculations for the Bracelet
 Since I have this newfound knowledge, let's put it to good use! First step: figure out voltage. I do that by looking at all parts of my circuit, and reading their docs. My schematic-reading abilities came in handy for this, because the Gemma M0 is a microcontroller, plus other parts, so I couldn't just rely on knowing the microcontroller and going from there. Happily, Adafruit puts out the schematic info, so I could look at it, and then google part numbers to find out what each part did. 
 
 The Gemma M0 is broken down into individual parts as understood from schematic here: [https://cdn-learn.adafruit.com/assets/assets/000/044/361/original/gemma_schem.png?1501106076](https://cdn-learn.adafruit.com/assets/assets/000/044/361/original/gemma_schem.png?1501106076). I also include the vibration motor, the only other power-hungry part in my circuit.
