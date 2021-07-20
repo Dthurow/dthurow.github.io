@@ -26,7 +26,7 @@ Or so I thought.
 
 ### The Plan
 
-Like I said, I wanted to keep it simple. I'm a big believer in the KISS principle, aka Keep It Simple, Stupid. I'm partly a big proponent of it because I so often forget it myself. I decided to use the Adafruit project as a basis, but do some minor mods to make sure I actually understood what all was happening. I don't want to mindlessly follow instructions and get an end result I don't understand. The modifications I wanted to do were simple:
+Like I said, I wanted to keep it simple. I'm a big believer in the KISS principle, aka Keep It Simple, Stupid. I'm partly a big proponent of it because I so often forget it myself when I'm working on fun side projects. I decided to use the Adafruit project as a basis, but do some minor mods to make sure I actually understood what all was happening. I don't want to mindlessly follow instructions and get an end result I don't understand. The modifications I wanted to do were simple:
 
 1. **Change the wrist strap**
 I didn't really like the design of Adafruit's bracelet. It just wasn't my style, you know? So I bought a cheap nylon strap from my local hardware store. I'd just sew all the components onto it, and use the buckle it came with to attach to my arm. Simple wristband with a bunch of electronics on it seemed my style.
@@ -59,14 +59,15 @@ Adafruit lists required parts, and I mostly followed that (except for the modifi
 - ruler
 - pen or marker
 - lighter for melting ends of the nylon strap
+- multimeter
 
 
 #### Planning the Circuit
-I'm using the adafruit project as a base, but I wanted to understand what was actually happening. The adafruit project has images and text describing what circuit you need to make, but no actual circuit schematic. Walking through what was needed, I arrived at the below circuit:
+The adafruit project has images and text describing what circuit you need to make, but no actual circuit schematic. Walking through what was needed, I arrived at the below circuit:
 
 ![Hand-drawn circuit diagram. Shows the Gemma's Vout pin connected to a diode and vibration motor in parallel, with the diode backwards. They connect to the collector side of a transistor. The transistor's base is connected to the A0 pin on the Gemma, via a resistor. The emitter side of the transistor is attached to Gemma's Ground pin. The Gemma also has a section labeld JST that connects to a batter, and it also has an A2 pin labeled as "cap button".](/assets/adafruit-mindfulness-bracelet/circuit_schematic.jpg)
 
-It's relatively simple. The motor connects to the the Vout pin, which is always the max voltage the battery or USB can give, then to a transistor, then to ground. The transistor is acting as a switch. Its base is connected to A0, which will be controlled by the code. When A0 is high, it'll "connect the switch" aka let the transistor connect the Vout to ground, causing electricity to flow through the motor and vibrate. The JST bit is the JST connector on the Gemma. I'll use that to connect to my coin cell batteries, and it'll be the power when the bracelet is on my wrist. The "cap button" is the A2 pin, which I'll use as a capacitive button, allowing me to cycle through the time between vibrations. 
+It's relatively simple. The motor connects to the the Vout pin, which is always the max voltage the battery or USB can give, then to a transistor, then to ground. The transistor is acting as a switch. Its base is connected to A0, which will be controlled by the code. When A0 is high, it'll "close the switch" aka let the transistor connect the Vout to ground, causing electricity to flow through the motor and vibrate. The JST bit is the JST connector on the Gemma. I'll use that to connect to my coin cell batteries, and it'll be the power when the bracelet is on my wrist. The "cap button" is the A2 pin, which I'll use as a capacitive button, allowing me to cycle through the time between vibrations. 
 
 >**Future Danielle note**: all of my planning writeups have 3.3V as the battery voltage. This is incorrect, as I explain later, but the rest is correct to the best of my knowledge
 
@@ -116,14 +117,140 @@ The basic version of the software is available on the project page here: [https:
 
 >**Future Danielle note**: This is a good example of me forgetting the KISS principle - **K**eep **I**t **S**imple, **S**tupid. While troubleshooting, I had to revert to the simpler version of the software repeatedly, because I didn't fully understand the hardware side
 
-The simplest change is allowing users to change how long the Gemma waits between vibrations. There isn't an easy way to let users type in a given number of minutes, but there are some capacitive touch buttons you can use. So I added the ability to cycle through a collection of times: 1 minute, 5 minutes, 10 minutes, and an hour. I attached cycling through these options to the Pad #0/A2 on the Gemma, setup as a capacitive touch button. And when the user changes the timing, they need to know what timing they've changed it to, so I need to inform the end user somehow. 
+#### Cycling Through Intervals
 
-need to include libraries from: [https://learn.adafruit.com/adafruit-gemma-m0/circuitpython-libraries](https://learn.adafruit.com/adafruit-gemma-m0/circuitpython-libraries)
+The first change is allowing users to change how long the Gemma waits between vibrations. There isn't an easy way to let users type in a given number of minutes, but there are some capacitive touch buttons you can use. So I added the ability to cycle through a collection of times: 1 minute, 5 minutes, 10 minutes, and an hour. I attached cycling through these options to the Pad #0/A2 on the Gemma, setup as a capacitive touch button. And when the user changes the timing, they need to know what timing they've changed it to, so I need to inform the end user somehow. 
 
-#### Minimizing Sleep()
+So for this, add a check if the capacitive touch button is set to true, meaning the user is touching it. Then, I have to update the interval timing. Here's that change in psuedo-python:
+
+{% highlight python %}
+    on_time = 2     # Vibration motor run time, in seconds
+    interval = 5
+    intervalArray = [60, 300, 600, 3600] #interval options user can choose from
+    intervalIndex = 1
+
+
+    while True:
+
+        # vibration turns on every interval seconds, for on_time seconds, non-blocking
+
+        if touch cap button:
+            intervalIndex = (intervalIndex + 1) mod len(intervalArray)
+            interval = intervalArray[intervalIndex]
+{% endhighlight %}
+
+This lets me cycle through the array options, and once I get to the end of the array, looping back (that's the mod bit)
+
+> **NOTE** mod, also represented as % means modulo, and it finds the remainder when you divide one number by another. E.g. if you divide 7 by 6 you'd get 1. A fun trick with modulo is that you can use it to keep an index value inside valid array indices without having to add `if` statements. If an array is 0-indexed, you can always do `index = (index + 1) % arrayLength` and the result will always be 0 to arrayLength-1, exactly the indices you need!
+
+#### Informing the User
+Now, I can change the time between vibrations, but I need to tell the user what I changed it to. I have a dotstar LED on the Gemma that I can flash at the user. One flash per minute seems pretty reasonable. Since I was using the dotstar, I had to include libraries on the Gemma. Adafruit has pre-built libraries you can download here: [https://learn.adafruit.com/adafruit-gemma-m0/circuitpython-libraries](https://learn.adafruit.com/adafruit-gemma-m0/circuitpython-libraries). You then copy the ones you need into the `lib` folder on the Gemma when it's plugged into your computer. I ended up having to copy the `adafruit_dotstar` and `pypixelbuf` libraries. Look farther down under my "troubleshooting" section for an explanation of how I found the minimal required libraries.
+
+
+So, the simple and naive version of informing users would be something like this (still in psuedo-python):
+
+{% highlight python %}
+    on_time = 2     # Vibration motor run time, in seconds
+    interval = 5
+    intervalArray = [60, 300, 600, 3600] #interval options user can choose from
+    intervalIndex = 1
+
+
+    while True:
+
+        # vibration turns on every interval seconds, for on_time seconds, non-blocking
+
+        if touch cap button:
+            intervalIndex = (intervalIndex + 1) mod len(intervalArray)
+            interval = intervalArray[intervalIndex]
+            # alert user of new time!
+            for range(0 to interval/60):
+                dotstar on
+                sleep for .25 seconds
+                dotstar off
+                sleep for .25 seconds
+{% endhighlight %}
+
+#### Minimizing Sleep
+If you write up the real python version of the psuedo code above and try it on your own project, you'll see that it works! *But* there's a bit of an issue there. It's those sleep statements! If you do this, and say, set it to 10 minute intervals, that means the code is going to be in that `for` loop for 5 seconds. While it's doing that, it's not checking if it needs to vibrate or even change the interval again (say if a user wants to skip from 5 minutes to a half hour and skip the 10 minutes entirely). 
+
+>**NOTE** How long the microcontroller takes for that `for` loop is straightforward calculation. Each single time through that `for` loop takes .25 seconds while the dotstar is on and .25 seconds while it's off, for a total of .5 seconds per loop. Take that times the known 10 times it needs to flash equal 5 seconds. Now there's also the time it takes for the dotstar to turn on and off, but it's very likely the sleep calls vastly outweigh the time for the dotstar. Plus, the only way to speed up turning the dotstar on and off is to write my own dotstar library, but I can speed up by removing sleep calls much more easily.
+
+So I need to update the code so it isn't blocking while flashing the dotstar. 
+
+{% highlight python %}
+    on_time = 2     # Vibration motor run time, in seconds
+    interval = 5
+    intervalArray = [60, 300, 600, 3600] #interval options user can choose from
+    intervalIndex = 1
+    timesToTellUserAboutTiming = 0
+
+
+    while True:
+
+        # vibration turns on every interval seconds, for on_time seconds, non-blocking
+
+        if touch cap button:
+            intervalIndex = (intervalIndex + 1) mod len(intervalArray)
+            interval = intervalArray[intervalIndex]
+            timesToTellUserAboutTiming = interval/60
+
+        if (timesToTellUserAboutTiming > 0):
+            dotstar on
+            sleep for .25 seconds
+            dotstar off
+            sleep for .25 seconds
+            timesToTellUserAboutTiming -= 1 
+
+{% endhighlight %}
+
+Adding a new global `timesToTellUserAboutTiming` variable lets me minimize how long the microcontroller is busy before it next checks if the cap button is touched. In this case, it will flash the dotstar once per `while True` loop, meaning the time between checking for button press is .5 seconds instead of potentially 5 or more. An order of magnitude of improvement, the best kind!
+
+Now, if I wanted to get even LESS sleep, so it responds even snappier, I could add in interrupts or other fancier functionality. But by the time I got to this point in my project, I was starting to remember the KISS principle and left it as "good enough". 
+
+#### Differentiating Hours and Minutes
+
+This last step was a result of user testing (me, I was the user). While testing out button presses, I realized having the dotstar flash 60 times for hour intervals was just plain silly. I wasn't going to count the flashes accurately past 10 or so, and it just took forever. So I decided to update the code one more time. This time, I updated it so that the color of the dotstar also carried info. If it was flashing blue, it was minutes, and green meant an hour. 
+
+{% highlight python %}
+    on_time = 2     # Vibration motor run time, in seconds
+    interval = 5
+    intervalArray = [60, 300, 600, 3600] #interval options user can choose from
+    intervalIndex = 1
+    timesToTellUserAboutTiming = 0
+    newTimingColor = blue
+
+
+    while True:
+
+        # vibration turns on every interval seconds, for on_time seconds, non-blocking
+
+        if touch cap button:
+            intervalIndex = (intervalIndex + 1) mod len(intervalArray)
+            interval = intervalArray[intervalIndex]
+            timesToTellUserAboutTiming = interval/60
+            newTimingColor = blue
+            if timesToTellUserAboutTiming >= 60:
+                timesToTellUserAboutTiming /= 60 # convert to hours
+                newTimingColor = green
+
+        if (timesToTellUserAboutTiming > 0):
+            dotstar on with newTimingColor
+            sleep for .25 seconds
+            dotstar off
+            sleep for .25 seconds
+            timesToTellUserAboutTiming -= 1 
+
+{% endhighlight %}
+
+This time, I check if the `timesToTellUserAboutTiming` is greater or equal to 60, which would mean it's an hour or longer interval. If so, change the color to green. Otherwise, keep it blue.
+
 
 #### Final Code
 
+With all of the above steps, I came out with the final product below. Note that there's certainly room for improvement, with some cleanup to make it simpler/easier to read. But again, in the spirit of KISS, and the fact I hadn't figured out how to write unit tests for this, I didn't refactor and left it at the version I knew worked.
+
+{% highlight python %}
     # Mindfulness Bracelet sketch for Adafruit Gemma.  Briefly runs
     # vibrating motor (connected through transistor) at regular intervals.
 
@@ -239,7 +366,7 @@ need to include libraries from: [https://learn.adafruit.com/adafruit-gemma-m0/ci
             setNewTiming()
 
         tellUserNewTiming()
-        
+{% endhighlight %}
 
 
 
@@ -248,20 +375,36 @@ need to include libraries from: [https://learn.adafruit.com/adafruit-gemma-m0/ci
 #### Troubleshooting Software
 Partway through my development, I somehow managed to reset the Gemma completely. It removed my code and libraries, and set it back to the default example it shipped with. I have no idea why. But happily (kind of),that meant I got to learn how to troubleshoot the Gemma some!
 
-Use troubleshooting to determine dotstar info: [https://learn.adafruit.com/adafruit-gemma-m0/troubleshooting](https://learn.adafruit.com/adafruit-gemma-m0/troubleshooting) 
+When it was reset to default, I first copied my code over. And then it just started blinking at me. As it turns out, adafruit includes a way of troubleshooting your code on the Gemma using just the dotstar. Their documentation here: [https://learn.adafruit.com/adafruit-gemma-m0/troubleshooting](https://learn.adafruit.com/adafruit-gemma-m0/troubleshooting), explains what different flashes mean.
 
-Use this to connect with repl and see error:[https://learn.adafruit.com/welcome-to-circuitpython/advanced-serial-console-on-mac-and-linux](https://learn.adafruit.com/welcome-to-circuitpython/advanced-serial-console-on-mac-and-linux)
+>Colors with multiple flashes following indicate a Python exception and then indicate the line number of the error. The color of the first flash indicates the type of error:
+>
+>GREEN: IndentationError
+>
+>CYAN: SyntaxError
+>
+>WHITE: NameError
+>
+>ORANGE: OSError
+>
+>PURPLE: ValueError
+>
+>YELLOW: other error
+
+Once that happened, I knew I needed to connect to the REPL so I could see the error there. I'm on linux, and so used [https://learn.adafruit.com/welcome-to-circuitpython/advanced-serial-console-on-mac-and-linux](https://learn.adafruit.com/welcome-to-circuitpython/advanced-serial-console-on-mac-and-linux) to get me to connect.
+
+I ended up using this to connect with repl and see the error:
 
 `screen /dev/ttyACM0 115200`
 
-Error was:
+And the first error was:
 
     main.py output:
     Traceback (most recent call last):
     File "main.py", line 9, in <module>
     ImportError: no module named 'adafruit_dotstar'
 
-added dotstar library, now error:
+Ah! Since it was set to default, the libraries I had it in were gone. So I re-downloaded the libraries and copied over the `adafruit_dotstar` library. Now, I got a different error:
 
     main.py output:
     Traceback (most recent call last):
@@ -269,18 +412,23 @@ added dotstar library, now error:
     File "adafruit_dotstar.py", line 22, in <module>
     ImportError: no module named 'adafruit_pypixelbuf'
 
-added pypixelbuf library, code now works
+Getting errors one at a time like this is kind of annoying. But! I copied over the `adafruit_pypixelbuf` library as well, and the code worked. Yay!
 
 
 ### Putting it all together
+I now have the code! I now have the hardware! Now the big step, load up the code, then disconnect the USB and power it by battery!
 
-It broke :(
+...why is it suddenly blinking brown at me?
+
+I restart it, same issue. I connect to USB, it works!
+
+Hmmm. The biggest difference there is amount of power it gets. Uh oh, I may be misunderstanding some things...
 
 ### Aside: Understanding Battery Calculations
 
 I haven't had much reason to learn battery calculations, aka figuring out what type of battery I need and how long they'll last. I was a web developer previously, if your laptop dies while you're looking at my site, that's a you problem. But now, it was very much my problem!
 
-Initially I had only one coin battery on it, but that didn't work, leading to brownouts. I figure I need more juice, because the USB works fine. After double checking the adafruit docs, it turns out it needs 4-6 Volts.But one coin battery is 3.3. Why does the initial project have a 3.7V battery? No idea. But let's see if I can hack something together. I remember you can increase voltage by connecting batteries...somehow. Some googling proved I can connect two coin batteries in series to increase the voltage amount: [https://www.power-sonic.com/blog/how-to-connect-batteries-in-series-and-parallel/](https://www.power-sonic.com/blog/how-to-connect-batteries-in-series-and-parallel/). I do this by connecting the negative terminal on one to positive of the other. The free positive and free negative attach to the microcontroller. I used the multimeter to check the voltage before I connect to the microcontroller, and it was 5.98V, which was perfect! I gave it a whirl, and it works! But the thing is, I wasn't entirely sure why. I googled around more, but only got more confused.
+Initially I had only one coin battery on my bracelet, leading to what I believe were brownouts, where the voltage dipped too low to support everything, and the microcontroller just complains at me. Since plugging it into USB works, I figure I need more juice. After double checking the adafruit docs, it turns out it needs 4-6 Volts.But one coin battery is 3.3. Why then does the initial project have a 3.7V battery? No idea. But let's see if I can hack something together. I remember you can increase voltage by connecting batteries...somehow. Some googling proved I can connect two coin batteries in series to increase the voltage amount: [https://www.power-sonic.com/blog/how-to-connect-batteries-in-series-and-parallel/](https://www.power-sonic.com/blog/how-to-connect-batteries-in-series-and-parallel/). I do this by connecting the negative terminal on one to positive of the other. The free positive and free negative attach to the microcontroller. I used the multimeter to check the voltage before I connect to the microcontroller, and it was 5.98V, which was perfect! I gave it a whirl, and it works! But the thing is, I wasn't entirely sure why. I googled around more, but only got more confused.
 
 I took to the local makerspace's slack, and got some lovely people to explain the concepts to me. After talking through my project and some general guidelines for calculating battery things, I came out with the following.
 
@@ -302,13 +450,15 @@ The Gemma M0 is broken down into individual parts as understood from schematic h
 | AP102-2020 | APA102 IC for the three-color RGB Dimming control strip and string | .3-6V | .1W-.5W aka 20mA-100mA according to [this watt to amp calculator](https://www.rapidtables.com/calc/electric/Watt_to_Amp_Calculator.html) | [https://cdn-shop.adafruit.com/product-files/3341/3341_APA102-2020+SMD+LED.pdf](https://cdn-shop.adafruit.com/product-files/3341/3341_APA102-2020+SMD+LED.pdf) |
 | 100614 | Vibration motor |  2.5~3.8V (adafruit site says 2V - 5V) | 75 mA max (adafruit site has a larger range depending on voltage, from 40mA-100mA) | [https://cdn-shop.adafruit.com/product-files/1201/P1012_datasheet.pdf](https://cdn-shop.adafruit.com/product-files/1201/P1012_datasheet.pdf) |
 
-Looking through all of this, the voltage needs to be between 2.5 and 6 volts. And the vibration motor needs only 5V. Right now, it's connected to Vout, which is supposed to be the max power the Gemma M0 is receiving. So it may actually be getting 5.98V right now. I can check with the multimeter
+Looking through all of this, the voltage needs to be between 2.5 and 6 volts. And the vibration motor needs only 5V. Right now, it's connected to Vout, which is supposed to be the max power the Gemma M0 is receiving. So it may actually be getting 5.98V right now. Since it hasn't blown up yet, it must be able to handle that, but I may need to update how that connects so I don't prematurely wear it out.
+
+
 
 For the vibration motor, because I'm turning it on and off for brief time periods, I don't want to just add the current it uses when on to the total amount, because it's only on for short times. So I need to calculate the duty cycle (percentage of time it's pulling current over a given cycle). So if it buzzes for one second every minute, that'd be 1/60, aka it's on 1.66% of the time. So if it's drawing 100mA cuz I'm giving it 5V, that means on average it's drawing 100mA*(1sec/60sec), aka 1.67mA.
 
 >**NOTE** Duty cycle is the percentage a part is on and drawing power, for a given cycle
 
-I have to also do this for the IC that controls the dotstar LEDs (part no. AP102-2020 in above table). This one has a max of 100mA current as well. In code, I'm turning on LEDs for a quarter of a second, to display info to end users. The max time the LED will flash is 10 times in a row (for 10 minute intervals).
+I have to also do this for the IC that controls the dotstar LEDs (part no. AP102-2020 in above table). This one has a max of 100mA current as well. In code, I'm turning on LEDs for a quarter of a second, to display info to end users. The max time the LED will flash is 10 times in a row (for 10 minute intervals). If it's drawing 100mA then 
 
 Current use (taking the max current usage for some leeway) is:
 
