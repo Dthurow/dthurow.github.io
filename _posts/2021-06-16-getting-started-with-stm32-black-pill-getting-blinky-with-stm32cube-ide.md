@@ -9,6 +9,7 @@ tags:
 - side project
 - microcontrollers
 - programming an stm32
+- embedded
 status: publish
 type: post
 published: true

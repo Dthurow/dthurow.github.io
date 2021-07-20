@@ -1,3 +1,32 @@
+---
+layout: post
+title: Bluetooth Low Energy and Reversing a "smart" light
+categories:
+- technical write up
+- side project
+- How-to
+- reverse engineering
+tags:
+- side project
+- teardown
+- embedded
+status: publish
+type: post
+published: true
+toc: true
+---
+
+
+
+### The Plan
+
+### Intro to Bluetooth Low Energy
+
+### Setting up the Sniffer
+
+### Analyzing Packets
+
+### Hypothesis and Testing
 
 
 downloaded extcap folder from adafruit: https://learn.adafruit.com/introducing-the-adafruit-bluefruit-le-sniffer/using-with-sniffer-v2

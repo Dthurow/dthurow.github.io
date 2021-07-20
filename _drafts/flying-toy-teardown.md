@@ -9,6 +9,7 @@ categories:
 tags:
 - side project
 - teardown
+- embedded
 status: publish
 type: post
 published: true

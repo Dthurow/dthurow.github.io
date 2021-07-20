@@ -11,6 +11,7 @@ tags:
 - side project
 - teardown
 - taking apart the netgear DM 200 modem
+- embedded
 status: publish
 type: post
 published: true

@@ -9,6 +9,7 @@ tags:
 - side project
 - microcontroller
 - programming atmega328p
+- embedded
 status: publish
 type: post
 published: true

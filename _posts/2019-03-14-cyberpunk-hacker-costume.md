@@ -8,6 +8,7 @@ tags:
 - python
 - costume
 - side project
+- embedded
 status: publish
 type: post
 published: true
