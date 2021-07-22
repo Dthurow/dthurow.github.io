@@ -51,6 +51,8 @@ Attended multiple Webinars by Wild West Hackin’ Cast
     * [Found test ports and got a serial command line with bus pirate]({% post_url 2021-05-13-netgear-dm-200-modem-breakdown-the-hardware-side %})
 * [Created an interactive game of life with a neotrellis]({% post_url 2020-09-01-2020-9-1-game-of-life-on-the-neotrellis-m4-express %})
 * [Took apart a printer and replaced a nintendo switch joystick]({% post_url 2020-09-10-2020-9-10-taking-things-apart-for-fun-and-well-mainly-fun %})
+* Completed Udemy course on [Unit testing and the Unity framework](https://www.udemy.com/course/unit-testing-and-other-embedded-software-catalysts/), written by the authors of [Throw the Switch](http://www.throwtheswitch.org/), a community that "wants to unleash the awesomely flexible power of C on our Embedded Systems without fearing the dangers"
+![Image of Udemy Certificate of Completion](/assets/unitTestingCertificate.jpg)
 
 #### Web technologies
 * [Learned Node.js]({% post_url 2020-07-23-2020-7-16-building-a-nodejs-and-vue-app-part-1-nodejs-server %})
