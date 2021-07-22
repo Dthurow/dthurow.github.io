@@ -450,26 +450,33 @@ The Gemma M0 is broken down into individual parts as understood from schematic h
 | AP102-2020 | APA102 IC for the three-color RGB Dimming control strip and string | .3-6V | .1W-.5W aka 20mA-100mA according to [this watt to amp calculator](https://www.rapidtables.com/calc/electric/Watt_to_Amp_Calculator.html) | [https://cdn-shop.adafruit.com/product-files/3341/3341_APA102-2020+SMD+LED.pdf](https://cdn-shop.adafruit.com/product-files/3341/3341_APA102-2020+SMD+LED.pdf) |
 | 100614 | Vibration motor |  2.5~3.8V (adafruit site says 2V - 5V) | 75 mA max (adafruit site has a larger range depending on voltage, from 40mA-100mA) | [https://cdn-shop.adafruit.com/product-files/1201/P1012_datasheet.pdf](https://cdn-shop.adafruit.com/product-files/1201/P1012_datasheet.pdf) |
 
+
+##### Voltage Calculation
 Looking through all of this, the voltage needs to be between 2.5 and 6 volts. And the vibration motor needs only 5V. Right now, it's connected to Vout, which is supposed to be the max power the Gemma M0 is receiving. So it may actually be getting 5.98V right now. Since it hasn't blown up yet, it must be able to handle that, but I may need to update how that connects so I don't prematurely wear it out.
 
 
+##### Current calculation
+
+For the parts that are potentially running all the time, I just need to get the max current use for each of them, aka the SAMD21 and the linear regulator. 
 
 For the vibration motor, because I'm turning it on and off for brief time periods, I don't want to just add the current it uses when on to the total amount, because it's only on for short times. So I need to calculate the duty cycle (percentage of time it's pulling current over a given cycle). So if it buzzes for one second every minute, that'd be 1/60, aka it's on 1.66% of the time. So if it's drawing 100mA cuz I'm giving it 5V, that means on average it's drawing 100mA*(1sec/60sec), aka 1.67mA.
 
 >**NOTE** Duty cycle is the percentage a part is on and drawing power, for a given cycle
 
-I have to also do this for the IC that controls the dotstar LEDs (part no. AP102-2020 in above table). This one has a max of 100mA current as well. In code, I'm turning on LEDs for a quarter of a second, to display info to end users. The max time the LED will flash is 10 times in a row (for 10 minute intervals). If it's drawing 100mA then 
+I have to also do this for the IC that controls the dotstar LEDs (part no. AP102-2020 in above table). This one has a max of 100mA current as well. In code, I'm turning on LEDs for a quarter of a second, to display info to end users. To keep it simple, I'll pretend the user wants to change the interval timing every 10 minutes. If it's flashing the max times (10 times for 10 minutes), then it'll be on for 5 seconds every 10 minutes. Or 5/600, aka 0.00833, or .83% of the time. That means it's average current use is about .83mA
 
 Current use (taking the max current usage for some leeway) is:
 
-(max current of SAMD21) + (max current of linear regulator) + (max current of dotstar RGB IC) + (average current of vibration motor)
+(max current of SAMD21) + (max current of linear regulator) + (average current of dotstar RGB IC) + (average current of vibration motor)
 
-3.64 mA + .055mA + 100mA + 1.67mA
+=3.64 mA + .055mA + .83mA + 1.67mA
 
-105.365 mA
+=6.195 mA
 
 
-if the battery is 220mAh, then with this circuit, the batteries will last 220mAh/105.365mA = 2.08797988 hours
+If the battery is 220mAh, then with this circuit, the batteries will last 220mAh/6.195mA = 35.51251008 hours
+
+Cool! That's certainly not a ton of time, since this would theoretically be on all day, but it's still way more than I expected. I honestly figured with my luck the math would work out to be an hour or something. 
 
 
 ### Conclusion
