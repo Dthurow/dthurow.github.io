@@ -451,11 +451,12 @@ The Gemma M0 is broken down into individual parts as understood from schematic h
 | 100614 | Vibration motor |  2.5~3.8V (adafruit site says 2V - 5V) | 75 mA max (adafruit site has a larger range depending on voltage, from 40mA-100mA) | [https://cdn-shop.adafruit.com/product-files/1201/P1012_datasheet.pdf](https://cdn-shop.adafruit.com/product-files/1201/P1012_datasheet.pdf) |
 
 
-##### Voltage Calculation
+**Voltage Calculation**
+
 Looking through all of this, the voltage needs to be between 2.5 and 6 volts. And the vibration motor needs only 5V. Right now, it's connected to Vout, which is supposed to be the max power the Gemma M0 is receiving. So it may actually be getting 5.98V right now. Since it hasn't blown up yet, it must be able to handle that, but I may need to update how that connects so I don't prematurely wear it out.
 
 
-##### Current calculation
+**Current calculation**
 
 For the parts that are potentially running all the time, I just need to get the max current use for each of them, aka the SAMD21 and the linear regulator. 
 
@@ -479,12 +480,31 @@ If the battery is 220mAh, then with this circuit, the batteries will last 220mAh
 Cool! That's certainly not a ton of time, since this would theoretically be on all day, but it's still way more than I expected. I honestly figured with my luck the math would work out to be an hour or something. 
 
 
+Now, I wanted to verify all this math with some measurements using my multimeter. I go to try, and....the Gemma errors out on me. I reset it. Same thing. Welp. Guess I won't be solving this in _this_ blog post! And I was so close!
+
+Before I tried to do the battery calculations, I had actually test-driven the watch. I wore it for a half hour or so, and it worked great! My suspicion is that something is using more power than I think, and it's draining the batteries. But I've used up all my coin cell batteries already, so I won't be able to probe the circuit with the multimeter to find the high power usage! I'll have to pick up more batteries next time I'm at the store, and try again then. But for now, I think this blog post has come to an end. Not the triumph I had envisioned, but a hard-fought battle with a lot of new concepts.
+
 ### Conclusion
+
+This project was a lot more work than what I thought "a simple embedded project" should be. But I learned a lot more about:
+- troubleshooting with multimeters
+- transfering a circuit schematic from a drawing to real-life
+- how to calculate battery life
+- coming up with alternative ideas to communicate to users
+- the importance of avoiding sleep (the function, not the real-live version)
+
+Which was honestly the goal, more than a working mindfulness bracelet. I'll continue working on this, and hopefully figure out the latest issue, and post talking about that. I may also look into transferring my functionality from CircuitPython to C and see if I can get that onto the Gemma. 
+
+Ultimately I think the defeat was mainly from biting off more than I can chew (aka forgetting to KISS). Making my first custom embedded project use batteries made it a lot more complicated that it would have been otherwise, and modifying the battery I use for it was definitely a mistake. Learning things is best done using +1 steps, learning just one new thing each time, but I was too excited and tried about a +10 instead. 
+
+I haven't given up on this project yet, but I may let it sit back burner as I work on other projects. I finished a unit testing course that I want to apply to a project, and I want to do more STM32 work. The frustrations of this mindfulness bracelet have defeated me for now (which is more than a little ironic), but not forever. 
 
 ### Resources
 
-The original project: https://learn.adafruit.com/buzzing-mindfulness-bracelet/overview
+The original project: [https://learn.adafruit.com/buzzing-mindfulness-bracelet/overview](https://learn.adafruit.com/buzzing-mindfulness-bracelet/overview)
 
-This troubleshooting page explains any blinking dotstar errors you may come across: https://learn.adafruit.com/adafruit-gemma-m0/troubleshooting 
+This troubleshooting page explains any blinking dotstar errors you may come across: [https://learn.adafruit.com/adafruit-gemma-m0/troubleshooting](https://learn.adafruit.com/adafruit-gemma-m0/troubleshooting) 
 
-Follow this to connect with repl and see errors when the Gemma is attached to your computer: https://learn.adafruit.com/welcome-to-circuitpython/advanced-serial-console-on-mac-and-linux
+Follow this to connect with repl and see errors when the Gemma is attached to your computer: [https://learn.adafruit.com/welcome-to-circuitpython/advanced-serial-console-on-mac-and-linux](https://learn.adafruit.com/welcome-to-circuitpython/advanced-serial-console-on-mac-and-linux)
+
+Learning about Electronics website [http://www.learningaboutelectronics.com/Articles/Vibration-motor-circuit.php](http://www.learningaboutelectronics.com/Articles/Vibration-motor-circuit.php)
