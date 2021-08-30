@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Learning to use Quadrature Rotary Encoders
+title: How to use Quadrature Rotary Encoders
 categories:
 - technical write up
 - side project
@@ -13,15 +13,18 @@ status: publish
 type: post
 published: true
 excerpt_separator: <!--more-->
+toc: true
 ---
 
 As part of a project I'm working on, I wanted to have a nice rotating switch that let me flip between different options. Googling around, I discovered that apparently meant I needed a rotary encoder. I bought one from adafruit, only to realize I had no idea how to use it. And oddly enough, Adafruit didn't have a pre-existing codebase I could pull from. It was time to read some datasheets, do some experiments, and figure out how to use it.
+
+![Rotary encoder with a black rubber knob on it, in front of a grey background](https://cdn-shop.adafruit.com/970x728/377-02.jpg)
 
 <!--more-->
 
 ## The Hardware
 
-I bought the [rotary encoder + extras](https://www.adafruit.com/product/377) from adafruit. I had originally thought to grab one from digikey or elsewhere (if only to get used to buying from other places), but the sheer amount of variables I had to know about frazzled me. Once I got it, I put the knob on it and gave it a twirl. A very satisfying clicky twisting motion, exactly what I wanted! Now to do some reading.
+I bought the [rotary encoder + extras](https://www.adafruit.com/product/377) from adafruit. I had originally thought to grab one from digikey or elsewhere (if only to get used to buying from other places), but the sheer amount of variables I had to know about frazzled me. How many detents are enough? What are pulses per revolution? Adafruit just gives you one option. It's a rotary encoder, what more do you need to know! Adafruit provides a one and done, and sometimes, that's what you want to do. Once I got it, I put the knob on it and gave it a twirl. A very satisfying clicky twisting motion, exactly what I wanted! Now to do some reading.
 
 Adafruit provides the [datasheet](https://cdn-shop.adafruit.com/datasheets/pec11.pdf), so I can see what's what. 
 
@@ -77,18 +80,19 @@ Turned clockwise, for each "click" of the knob, I get this:
 |1 | 0 |
 |1 | 1 |
 
-If I want, I can just put those two values next to each other and get a binary number. So it goes from 11, to 01, to 00, to 10, to 11. And the decimal equivalent is: 3, 1, 0, 2, 3
+If I want, I can just put those two values next to each other and get a binary number. So it goes from 11, to 01, to 00, to 10, to 11. With the decimal equivalent being: 3, 1, 0, 2, 3
 
-So the encoder is going clockwise if:
+So if I track the previous state and the current state, I can tell it's going clockwise if any of these are true:
 ```
+previous state->current state
 3->1
 1->0
 0->2
 2->3
 ```
-From this I can see I'll have to at least track current and previous state. Because it matters what state it's coming from. Just knowing current state is "0" doesn't mean anything.
+From this I can see I'll have to at least track current and previous state, because it matters what state it's coming from. Just knowing current state is "0" doesn't mean anything about direction.
 
-Let's see if that pattern is different when it's turned counter clockwise. The values end up being:
+Let's see if that pattern is different when it's turned counter-clockwise. The values end up being:
 
 |pin A |pin B |
 |-----|-----|
@@ -107,10 +111,11 @@ So it's going counterclockwise if:
 0->1
 1->3
 ```
+## Second Test - Lookup tables
 
-Since I'll have to do this in code eventually anyway, lets do 1 to mean clockwise and -1 to mean counter clockwise. I can then list out all possible combinations of a previous and current state, and determine which way I'm going, or if I'm missing anything.
+Since I'll have to do this in code eventually anyway, let's do 1 to mean clockwise and -1 to mean counter clockwise. I can then list out all possible combinations of a previous and current state, and determine which way I'm going, or if I'm missing anything.
 
-| prev | cur | direction |
+| previous state | current state | direction |
 |---|---|---|
 | 0 | 0 | UNDEFINED |
 | 0 | 1 | -1 |
@@ -129,7 +134,7 @@ Since I'll have to do this in code eventually anyway, lets do 1 to mean clockwis
 | 3 | 2 | -1 |
 | 3 | 3 | UNDEFINED |
 
-Based on this, I can see there's a lot of options that don't mean the encoder went clockwise OR counter clockwise. There's two separate groups of undefined values. If the previous and current values from the encoder are the same, that just means I read the values so fast, it didn't have time to change (or in the case of 3, the encoder isn't moving at all). So those just mean it didn't move. For the other group of undefined values, they're harder to categorize. Going from 0 to 3 means EITHER I moved clockwise so fast I went from 0 to 2 to 3 before my code had a chance to read the encoder values, OR I moved it _counter_ clockwise so fast I went from 0 to **1** to 3. So that tells me the encoder rotated, but I don't know which way! I'm not sure how to solve that, so I'm just going to treat that as a different "SKIPPED VALUE" category. 
+Based on this, I can see there's a lot of options that don't mean the encoder went clockwise OR counter clockwise. Looking at those undefined values, there's two separate groups. If the previous and current values from the encoder are the same, that just means I read the values so fast, it didn't have time to change (or in the case of 3, the encoder isn't moving at all). So those just mean it didn't move. For the other group of undefined values, they're harder to categorize. Going from 0 to 3 means EITHER I moved clockwise so fast I went from 0 to 2 to 3 before my code had a chance to read the encoder values, OR I moved it _counter_ clockwise so fast I went from 0 to **1** to 3. So that tells me the encoder rotated, but I don't know which way! I'm not sure how to solve that, so I'm just going to treat that as a different "SKIPPED VALUE" category. 
 
 I can reorganize the data to make it a bit more readable (at least to me), by putting the previous value as the first column, and the current value as the first row, like this:
 
@@ -139,7 +144,7 @@ I can reorganize the data to make it a bit more readable (at least to me), by pu
 | 2 | -1 | SKIPPED A VALUE | DIDN'T MOVE | 1 |
 | 3 | SKIPPED A VALUE | 1 | -1 | DIDN'T MOVE |
 
-Well hey, that looks an awful lot like a lookup table, a 4x4 array with the indices corresponding to the values. Let's do that! For the "DIDN'T MOVE" category, I can just set it to 0, and for when I skip values, I'll do 2, a clearly wrong value.
+Well hey, that looks an awful lot like a lookup table, a 4x4 array with the indices corresponding to the values. Let's do that! For the "DIDN'T MOVE" category, I can just set it to 0, and for when I skip values, I'll do 2, a clearly wrong value. With that, I get the below table:
 ```
 {0, -1, 1, 2}
 {1, 0, 2, -1}
@@ -147,7 +152,7 @@ Well hey, that looks an awful lot like a lookup table, a 4x4 array with the indi
 {2, 1, -1, 0}
 ```
 
-Code to see if this works:
+With this planning, I can now try some code out and see if it works.
 
 {% highlight c++ %}
 #define PIN_ENCODER_A      4
@@ -157,9 +162,9 @@ int prevVal = 0;
 int newVal;
 
 int lookupTable[4][4] = { {0, -1, 1, 2},
-{1, 0, 2, -1},
-{-1, 2, 0, 1},
-{2, 1, -1, 0} };
+                          {1, 0, 2, -1},
+                          {-1, 2, 0, 1},
+                          {2, 1, -1, 0} };
 
 void setup() {
   Serial.begin(115200);
@@ -200,6 +205,8 @@ void loop() {
 }
 {% endhighlight %}
 
+## Final Code - Tracking State
+
 This correctly understands clockwise and counterclockwise movement. HOWEVER, there's two issues. One, it's triggering roughly 4 times each detent, and Two sometimes the code manages to get a bounce or something else wonky, and it reads, say, 3 clockwise and one counterclockwise movement while I'm moving it clockwise. So I want to track all the states it passes through, and then figure out which way its going, ignoring those occasional misreads.
 
 >**NOTE** "detent" is a fancy word for that "click" feeling you get with rotary encoders. Each "click" position is a detent.
@@ -221,9 +228,9 @@ unsigned int counterClockState = 0;
 //clockwise (1) or counterclockwise (-1)
 //didn't move (0) or skipped a value (2)
 int lookupTable[4][4] = { {0, -1, 1, 2},
-{1, 0, 2, -1},
-{-1, 2, 0, 1},
-{2, 1, -1, 0} };
+                          {1, 0, 2, -1},
+                          {-1, 2, 0, 1},
+                          {2, 1, -1, 0} };
 
 void setup() {
   Serial.begin(115200);
@@ -276,11 +283,14 @@ void loop() {
 {% endhighlight %}
 
 
-This seems to work! I get a single "result was blah" for every turn, and it seems to be the correct rotation, too! The remaining issue depends on the other code I use this with. This code assumes I'll be able to read at least 3 out of the 4 states the rotary encoder goes through every time it turns left or right. If I'm checking the encoder in a main loop, and my other code goes really slow, I may only get one or two states. 
+This seems to work! I get a single "result was blah" for every turn, and it seems to be the correct rotation, too! The remaining issue depends on the other code I use this with. This code assumes I'll be able to read at least 3 out of the 4 states the rotary encoder goes through every time it turns left or right. If I'm checking the encoder in a main loop, and my other code goes really slow, I may only get one or two states. An alternative to this would be setting up an interrupt, so it jumps to reading the encoder every time it changes state. However, interrupts are outside the scope of this blog post, so I'll leave that as an exercise for the reader.
+
+## Conclusion
+
+Hopefully this gives more info on what to expect when using a rotary encoder in your future projects. It's a lot more complicated than a potentiometer, but that lovely clicky feeling can be perfect for switching between a bunch of options. And now you have the knowledge to use them. So go forth and get clicky!
 
 
 ## Resources
-
 
 - Datasheet for the rotary encoder [https://cdn-shop.adafruit.com/datasheets/pec11.pdf](https://cdn-shop.adafruit.com/datasheets/pec11.pdf)
 - Sparkfun document talking about reading rotary encoders[https://cdn.sparkfun.com/datasheets/Robotics/How%20to%20use%20a%20quadrature%20encoder.pdf](https://cdn.sparkfun.com/datasheets/Robotics/How%20to%20use%20a%20quadrature%20encoder.pdf)
