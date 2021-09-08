@@ -12,6 +12,7 @@ tags:
 status: publish
 type: post
 published: true
+excerpt_separator: <!--more-->
 meta:
   _thumbnail_id: '14'
 ---
@@ -32,7 +33,7 @@ This last Halloween I decided to pull out all the stops and finally use my Adabo
   
     
 ![HACK THE PLANET!!](/squarespace_images/image1.jpg)
-    
+    <!--more-->
 
 
   
