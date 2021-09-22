@@ -29,9 +29,9 @@ Use the [adafruit bluetooth LE sniffer](https://www.adafruit.com/product/2269) t
 
 ## Intro to Bluetooth Low Energy
 
-First, the bluetooth light will advertise itself using GAP, until an app or what have you connects to it. I'm not going to go into that right now, because for reverse engineering, I know it connects, I want to know what it does once it's connected. That means I need to focus on a different protocol, GATT.
+First, the bluetooth light will advertise itself using Generic Access Profile, aka GAP, until an app or what have you connects to it. I'm not going to go into that right now, because for reverse engineering, I know it connects, I want to know what it does once it's connected. That means I need to focus on a different protocol, Generic Attribute Profile, aka GATT.
 
-Once connected, it switches to using GATT to communicate. GATT is what allows you to interact with the lightbulb (or other peripheral device). You can read data from the lightbulb (e.g. what color it is right now), or send data (e.g. setting the color, setting the timer).
+Once a bluetooth low energy thing is connected to the app that controls it, it switches to using GATT to communicate. GATT is what allows you to interact with the lightbulb (or other peripheral device). You can read data from the lightbulb (e.g. what color it is right now), or send data (e.g. setting the color, setting the timer).
 
 For GATT there are three concepts that are the most important: profiles, services, and characteristics. Profiles are collections of services, and services have a collection of characteristics. Characteristics are basically just key/value pairs that let you read and write data to the connected device. Services collect related characteristics (e.g. color control characteristics would all be grouped in a color service). Profiles are an abstract collection of services, not on a device itself. Services and characteristics ARE on the device.
 
@@ -51,11 +51,21 @@ The conceptual model I currently have is something like this:
 
 ![Simple diagram with boxes connected with lines. Profiles, services, characteristics, and characteristic descriptors are each a seperate box with a line between each](/assets/bluetooth-sniffing/bluetooth_UML_Style_Explanation.png)
 
+The little "+" on the line indicates that the box above it can have one or more. So a profile can have one or more services in it. The "*" means it can have zero or one. So the Characteristics can have zero or more characteristic descriptors. The words tabbed in are individual fields. So Characteristics have permissions and a value.
+
 However, that's the conceptual idea, not the implementation. In a more in-depth way, GATT is a big table. Each row has a handle to reference it, kind of like a key in a key/value pair. Then there's a type, which is a UUID that either matches up with the [16-bit UUID Numbers Document](https://btprodspecificationrefs.blob.core.windows.net/assigned-values/16-bit%20UUID%20Numbers%20Document.pdf) or is custom. Then permissions (READ, WRITE, NOTIFY), and lastly, some sort of value, which depends on the type of that row. Yes, that's pretty of confusing. 
 
-Remember that conceptual model? That maps to this table, I'll walk you through it. Since the profiles are abstract, we can just ignore them for now. So first, we have to declare we have a service. We do this by creating a handle (in my example below, 0x001), setting the type as "Service Declaration", permission to read only, and then the value as a UUID that says what sort of service it is. Bluetooth has a lot of declared "GATT Service Type" UUIDs in the document I linked above, you can browse them if you want. 
+>**NOTE** That [16-bit UUID Numbers Document](https://btprodspecificationrefs.blob.core.windows.net/assigned-values/16-bit%20UUID%20Numbers%20Document.pdf) is really important. It lists all bluetooth-defined UUIDs. These UUIDs are used all over the place to identify the type of row each row in the GATT table is, types of characteristics and descriptors, etc. 
 
-Now that a service has been declared, lets declare some characteristics. Instead of having a single row where the "value" column is the value of the characteristic, we first have to do a Characteristic Declaration, like we did the service. So that gets its own handle, the type is "Characteristic Declaration", it's read only, and the value is the handle of the characteristic value (I'll get to that next), the type of characteristic it is, and the permissions for this characteristic (e.g. if it's WRITE or READ only). The type of characteristic is one of the "GATT Characteristic and Object Type" UUIDs in the bluetooth doc linked above, _OR_ a custom UUID that the devs decide on.
+Remember that conceptual model? That maps to this table, I'll walk you through making your own GATT table. Since the profiles are abstract, we can just ignore them for now. So first, we have to declare we have a service. We do this by creating a handle (in my example below, 0x001), setting the type as "Service Declaration", permission to read only, and then the value as a UUID that says what sort of service it is. Bluetooth has a lot of declared "GATT Service Type" UUIDs in the document I linked above, you can browse them if you want. 
+
+Now that a service has been declared, lets declare some characteristics. Instead of having a single row where the "value" column is the value of the characteristic, we first have to do a Characteristic Declaration, like we did the service. So that gets its own handle, the type is "Characteristic Declaration", it's read only, and the value has several bits of info:
+
+- the handle of the characteristic value (I'll get to that next)
+- the type of characteristic it is
+- the permissions for this characteristic (e.g. if it's WRITE or READ only). 
+
+The type of characteristic is one of the "GATT Characteristic and Object Type" UUIDs in the bluetooth doc linked above, _OR_ a custom UUID that the devs decide on.
 
 Once we have have the Characteristic _declaration_ we can add a row talking about the Characteristic's _value_. It gets a handle, type, and permission that all have to match what the Characteristic Declaration said it would have. Finally, the value field for this row is the actual value set by the peripheral. So if this characteristic lets me read the hex color the light is currently set to, the value would be some hex value like `64ff32`.
 
@@ -68,7 +78,7 @@ Here's the table I described above, but in actual table-form:
 | 0x001 | Service declaration UUID (0x2800 for primary services, 0x2801 for secondary) | read only | UUID that matches the "GATT Service type" UUIDs from Bluetooth, or custom value |
 | 0x002 | Characteristic Declaration UUID (0x2803) | read only | This characteristic value's: handle (in this case 0x003), type (one of the "GATT Characteristic and Object Type" UUIDs from bluetooth, or custom), permissions |
 | 0x003 | type declared by 0x002 | permissions declared by 0x002 | some value set by the peripheral|
-| 0x004 | Characteristic Descriptor (one of the "GATT Descriptor" UUIDs from bluetooth or custom) | depends on descriptor type | some sort of value |
+| 0x004 | Characteristic Descriptor (one of the "GATT Descriptor" UUIDs from bluetooth or custom) | depends on descriptor type | some sort of value, e.g. "Hex value of light" |
 
 Oof that's a lot of theory and examples, let's get back to what I wanted to do in the first place, poke around at a lightbulb.
 
@@ -119,11 +129,11 @@ The basic steps I did was:
 
 Once the initial setup was done, I closed wireshark, plugged in the sniffer, re-opened wireshark, and found the sniffer listed as "nrf-Sniffer" in the list of local interfaces on wireshark. But when I double clicked to run, I got the error: "Couldn't run /usr/bin/dumpcap in child process: Permission denied". Turns out my account wasn't included in the `wireshark` group, so I had to update it by running `sudo usermod -a -G wireshark danielle`. Once I logged off and then logged on again it worked. I was sniffing packets!
 
-Nordic semiconductor has a user guide that adafruit saved a copy of, it's worth a read: [https://cdn-learn.adafruit.com/assets/assets/000/059/041/original/nRF_Sniffer_User_Guide_v2.1.pdf?1533935335](https://cdn-learn.adafruit.com/assets/assets/000/059/041/original/nRF_Sniffer_User_Guide_v2.1.pdf?1533935335)
+> **NOTE** Nordic semiconductor has a user guide that adafruit saved a copy of, it's worth a read: [https://cdn-learn.adafruit.com/assets/assets/000/059/041/original/nRF_Sniffer_User_Guide_v2.1.pdf?1533935335](https://cdn-learn.adafruit.com/assets/assets/000/059/041/original/nRF_Sniffer_User_Guide_v2.1.pdf?1533935335)
 
 ## Sniffing Packets
 
-During the initial sniffing to see what's up, I was really frustrated by something so I want to highlight it right away. The sniffer is not guarenteed to catch every packet on the air. So sometimes, it will miss the connection request from the phone to the lightbulb. This means it can't track that connection, and wireshark wont display any packets after the phone is connected, even if it's sending lots of data back and forth. If you connect to the lightbulb (or other bluetooth LE device) and wireshark stops tracking it, close the app on your phone, wait for it to start advertising again, and try to connect again. 
+During the initial sniffing to see what's up, I was really frustrated by something so I want to highlight it right away. The sniffer is not guarenteed to catch every packet on the air. So sometimes, it will miss the connection request from the phone to the lightbulb. This means it can't track that connection, and wireshark wont display any packets after the phone is connected, even if it's sending lots of data back and forth. If you connect to the lightbulb (or other bluetooth LE device) and wireshark stops tracking it, close the app on your phone, wait for the lightbulb to start advertising again, and try to connect again. 
 
 ### Following One Device
 Once the wireshark session is started, you'll probably be slammed with a bunch of advertising packets from every peripheral device that isn't currently connected. The nordic add-on for wireshark has a drop down labeled "Device", which lists the Mac address of all advertising addresses. Select the lightbulb `50:33:8B:10:9B:EB` and it'll only display those packets. 
@@ -151,7 +161,12 @@ This is a more manageable list. Poking around, we can see initially the phone is
 Now that I've poked around some, let's do some testing.
 
 ### Hypothesis and Testing
-The first thing I want to figure out is something I would think is the simplest: setting the color of the lightbulb. The lightbulb app lets you set the color by selecting a point on a color wheel and set brightness with a slider bar at the bottom of the screen. You can also save up to 5 specific color/brightness settings and switch to them with a touch of a button. So, **my hypothesis**: It's probably sending color data via either RGB or Hex. To easiser find those packets, I can save specific colors, varying the color and brightness, and then sniff the connection while repeatedly cycling through my saved colors. 
+The first thing I want to figure out is something I would think is the simplest: setting the color of the lightbulb. The lightbulb app lets you set the color by selecting a point on a color wheel and set brightness with a slider bar at the bottom of the screen. The RGB of the color you select is displayed in the upper left. You can also save up to 5 specific color/brightness settings and switch to them with a touch of a button. Here's a screenshot:
+
+![Screenshot of app as described above](/assets/bluetooth-sniffing/Screenshot_magicLight_ColorPicker.png)
+
+
+So, **my hypothesis**: It's probably sending color data via either RGB or Hex. To easiser find those packets, I can save specific colors, varying the color and brightness, and then sniff the connection while repeatedly cycling through my saved colors. 
 
 Here's the color options I saved, their RGB, Hex, and Brightness values:
 
@@ -162,7 +177,7 @@ Here's the color options I saved, their RGB, Hex, and Brightness values:
 |option three |102, 51, 255 |6633ff| 100%     |
 |option four  |51, 25, 128  |331980| 50%      |
 
-NOTE: I made option 3, then set the brightness to 50% and then set that as option four. So it should have had the same RGB values. Since it didn't, that must mean the app code changed the RGB value based on brightness. So brightness may just be a function of RGB and not a separate variable at all.
+>**NOTE**: I made option 3, then set the brightness to 50% and then set that as option four. So it should have had the same RGB values. Since it didn't, that must mean the app code changed the RGB value based on brightness. So brightness may just be a function of RGB and not a separate variable at all.
 
 With that set, I disconnected from the lightbulb, started a wireshark session, connected, and cycled through the saved colors I just added, going through them in order 3 times. 
 
@@ -198,7 +213,7 @@ Basic steps for use:
 1. In terminal, run `hcitool dev`, which shows any bluetooth hardware connected to my laptop, and it's status. I took a screenshot of running this command when the bluetooth is turned off, then turned on, to see the difference:
 ![Screenshot of terminal](/assets/bluetooth-sniffing/terminal_hcitoolDev_bluetoothOffAndOn.png)
 1. Running `sudo hcitool lescan` does a low energy scan with the default bluetooth device (my laptop's `hci0` device) and shows the IDs of any broadcasting peripherals. I spotted the `50:33:8B:10:9B:EB` device so I know my laptop is within range.
-> **NOTE** if sudo hcitool lescan doesn't return anything, may have to turn off bluetooth and turn it back on
+> **NOTE** if `sudo hcitool lescan` doesn't return anything, you may have to turn off bluetooth and turn it back on again. I had that happen a couple times and it was unclear why that happened.
 1. Run `sudo gatttool -I` to start an interactive gatttool instance, and then enter `connect 50:33:8B:10:9B:EB` to connect and start interactive session with lightbulb. For help with gatttool, type `help`
 
 Using the gatt tool's `characteristics` command I get a list of all characteristics and their UUIDs. The nordic app listed the RGBW 4bytes characteristic as a UUID of 0xFFE9. The `characteristics` command gives this line with that UUID:
@@ -214,7 +229,7 @@ If I only had the wireshark data, I could also work backwards to find out the ch
 attr handle: 0x0023, end grp handle: 0x0033 uuid: 0000ffe5-0000-1000-8000-00805f9b34fb
 ```
 
-So I can then run `characteristics 0x0323 0x0033` and see all characteristics:
+So I can then run `characteristics 0x0023 0x0033` and see all characteristics:
 
 ```
 handle: 0x0024, char properties: 0x0a, char value handle: 0x0025, uuid: 0000ffe6-0000-1000-8000-00805f9b34fb
@@ -232,7 +247,7 @@ And that hex value, when dropped into a hex to ASCII converter, gives us "RGBW 4
 
 
 
-I know I should send a write command to the `0x002e` handle, and I if I want to send a color, I need to have the hex value, surrounded by unknown, seemingly hard-coded values. So sending two different colors would be:
+I know I should send a write command to the `0x002e` handle, and if I want to send a color, I need to have the hex value, surrounded by unknown, seemingly hard-coded values. So sending two different colors would be:
 ```
 char-write-cmd 0x002e 5664ff3200f0aa
 char-write-cmd 0x002e 5633198000f0aa
@@ -243,12 +258,12 @@ Hit enter on one of them, and...IT WORKS!!!!!!
 After I danced around a bit, I tested it a bit more. Looks like the command to send arbitrary color, where XXXXXX is hex color, is: `char-write-cmd 0x002e 56XXXXXX00f0aa`. The extra bytes before and after the hex color don't seem to matter much, though without them it doesn't work. Something to signify to the lightbulb I'm sending a hex value, I guess.
 
 ### Other Commands
-Using the same process described above, I also looked into the ability to turn the lightbulb on and off, and the default "Warm White" and "Cool Light" settings. They all _also_ send to the `0x002e` handle, just sending different values. My discoveries:
+Using the same process described above, I also looked into the ability to turn the lightbulb on and off, and the default "Warm White" and "Cool White" settings. They all _also_ send to the `0x002e` handle, just sending different values. My discoveries:
 
 - Turn off Light: `char-write-cmd 0x002e cc2433`
 - Turn on Light: `char-write-cmd 0x002e cc2333`
 - Set to "Warm white": `char-write-cmd 0x002e 56000000ff0faa`
-- Set to "Cool light": `char-write-cmd 0x002e 56ffffff00f0aa`
+- Set to "Cool White": `char-write-cmd 0x002e 56ffffff00f0aa`
 
 For the warm white, I can see it sets the hex color to all zeros, but sets the two zeros after the hex color to `ff`. This implies to me there's actually two sets of lights in there. One does the color, and one does the "Warm white" light. Sadly I only have one lightbulb, otherwise I'd be tempted to do a teardown to see if I'm right...
 
