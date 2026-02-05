@@ -13,6 +13,8 @@ meta: {}
 
 This page includes a bunch of different websites, books, videos, etc. that I've found useful in my quest for knowledge and cool stuff. Perhaps it will help you too. They're (roughly) sorted by areas of interest.
 
+Not guaranteed to be up to date
+
 ## Embedded Systems
 
 Intro to embedded systems:

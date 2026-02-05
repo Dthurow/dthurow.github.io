@@ -8,21 +8,9 @@ type: page
 published: true
 meta: {}
 ---
-  
-  
-    
-![Me at the Kennedy Space Center, with a very serious Wally Schirra (A member of the Mercury 7)](/squarespace_images/KennedySpaceCenterWithWally.jpg)          
-Me at the Kennedy Space Center, with a very serious Wally Schirra (A member of the Mercury 7)
-  
 
 
-  
-
-
-
-I graduated from Western Washington University March 2015 with a BS in CS and a minor in math. For the past 5 years I worked as a Senior Software Engineer, connecting up databases to the web, arguing over best long-term architectural decisions, and whatever else they needed me to do. Currently working as a freelance developer, living  in beautiful Minneapolis, MN.
-
-In my spare time, I play with infosec, reverse engineering, learning Japanese, and whatever else catches my fancy.
+I graduated from Western Washington University March 2015 with a BS in CS and a minor in math, and have been moving closer to the hardware since. Started as a web developer and moved into embedded systems.  In my spare time, I play with infosec, reverse engineering, learning Japanese, and whatever else catches my fancy.
 
 
 ## Education
@@ -32,16 +20,10 @@ In my spare time, I play with infosec, reverse engineering, learning Japanese, a
 **Bachelors of Science in Computer Science with a Minor in Mathematics**
 * from Western Washington University. Graduated March 2015 with 3.5 GPA
 
-### Ongoing
 
-#### Security
+## Personal Projects
 
-Attended multiple Webinars by Wild West Hackin’ Cast 
-* Intro to OT(Operational Technology) 1 hour webinar 
-* Intro to Linux Forensics Logs 1 hour webinar  
-* SOC Core Skills 16 hour webinar
-
-#### Embedded systems
+### Embedded
 
 * Programmed an ATmega328p from an Arduino Uno, without using the Arduino ecosystem
     * [Taking it off the Uno and using a programmer]({% post_url 2021-05-25-directly-programming-an-atmega328p-from-an-arduino-uno %})
@@ -54,16 +36,33 @@ Attended multiple Webinars by Wild West Hackin’ Cast
 * Completed Udemy course on [Unit testing and the Unity framework](https://www.udemy.com/course/unit-testing-and-other-embedded-software-catalysts/), written by the authors of [Throw the Switch](http://www.throwtheswitch.org/), a community that "wants to unleash the awesomely flexible power of C on our Embedded Systems without fearing the dangers"
 ![Image of Udemy Certificate of Completion](/assets/unitTestingCertificate.jpg)
 
-#### Web technologies
+### Web technologies
 * [Learned Node.js]({% post_url 2020-07-23-2020-7-16-building-a-nodejs-and-vue-app-part-1-nodejs-server %})
 * [Created a working docker file to run .NET Core on heroku]({% post_url 2020-07-09-2020-7-9-running-net-core-in-heroku %})
 
 ## Work
 
-### Freelance Software Developer
-**2020 to present**
+### Senior Firmware engineer
+**2024 through 2025**
 
-Currently working with individual clients and non-profits to develop custom websites and applications to support their businesses. I do web development and  hosting work to create stable, simple solutions that do what my clients want, to enable them to keep their businesses working. 
+- Worked on Zephyr and Free RTOS projects
+- Led deep dive in CAN Hardware configuration to improve CAN FD comms
+- Firmware testing automation work with pyVISA and SCPI
+- Member of Modernization working committee
+
+### Firmware Engineer II and Senior Firmware engineer
+**2021 to 2024**
+
+Work Included
+- Developing on Arm Cortex-M CPUs to make bare-metal C drivers for new custom hardware
+- Unit testing and integration testing with C++
+- Followed Class III medical device process and documentation requirements
+- Lead dev on firmware for new technology research project using new BLE
+
+### Freelance Software Developer
+**2020 to 2021**
+
+Worked with individual clients and non-profits to develop custom websites and applications to support their businesses. I do web development and  hosting work to create stable, simple solutions that do what my clients want, to enable them to keep their businesses working. 
 
 ### Senior Software Engineer
 **2018-2019**

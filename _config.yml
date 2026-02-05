@@ -25,7 +25,6 @@ description: >- # this means to ignore newlines until "baseurl:"
   a semi-coherent collection.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: improbablyadev
 github_username:  dthurow
 linkedin_username: danielle-thurow-a0934884
 permalink: /blog/:year/:i_month/:i_day/:title
