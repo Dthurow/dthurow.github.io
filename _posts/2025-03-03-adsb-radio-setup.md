@@ -18,7 +18,7 @@ excerpt_separator: <!--more-->
 
 Radio has always been a side interest of mine, but seemed too convoluted for me to easily get into. However, now with Software-Defined Radios (SDR), things started to shift into the software world, so I started to get my toes wet. One use that seemed pretty popular was tracking airplanes, so I thought I'd give it a go.
 
-I had previously setup an ADSB receiver using the [adsb exchange raspberry pi image](https://www.adsbexchange.com/how-to-feed/adsbx-custom-pi-image/), and found it a little finicky. I also had other uses for the pi, so I eventually retired that setup, with the eventual plan to get it back up and running "sometime in the future". Which turns out is around now! (don't...don't ask how long it was since I did that setup the first time)
+I had previously setup an ADSB receiver using the [adsb exchange raspberry pi image](https://www.adsbexchange.com/how-to-feed/adsbx-custom-pi-image/), and found it a little finicky. I also had other uses for the pi, so I ended up retiring that setup, with the eventual plan to get it back up and running "sometime in the future". Which turns out is around now! (don't...don't ask how long it was since I did that setup the first time)
 
 This time, I came across a different raspberry pi image that was actually default included in the [rasperry pi imager tool](https://www.raspberrypi.com/software/), called [ADSB.im](https://adsb.im/home), and decided to give it a try again. I've had it setup for about a month now (probably more once this is published!), and have learned a lot, so I thought I'd share.
 
@@ -30,7 +30,7 @@ This time, I came across a different raspberry pi image that was actually defaul
 
 Besides looking at planes with your eyeballs, there's a variety of ways to track aircraft. The most common is looking at the ADSB data. The [Automatic Dependent Surveillance–Broadcast](https://en.wikipedia.org/wiki/Automatic_Dependent_Surveillance%E2%80%93Broadcast) is broadcast on the 1090 Mhz or 978 MHz frequency, sending out info like speed, course, altitude, callsign and identification of an aircraft. You don't even have to setup your own station to see this, you can go to [ADSBExchange](https://globe.adsbexchange.com/) or [ADSB.lol](https://adsb.lol/) to see them right now!
 
-There's also a lot of ways to listen in on the air traffic control conversations, but that's not talked about in this article because it's not playing with frequencies and SDRs. Though I do want to mention, the Minneapolis airport has a live youtube video that shows the airport and also plays the conversations: [https://www.youtube.com/live/FY6WlMjzG2U?si=9Io45ISSSH3IGIuM](https://www.youtube.com/live/FY6WlMjzG2U?si=9Io45ISSSH3IGIuM)
+There's also a lot of ways to listen in on the air traffic control conversations, but that's not talked about in this article because that's a different can of worms. Though I do want to mention, the Minneapolis airport has a live youtube video that shows the airport and also plays the conversations: [https://www.youtube.com/live/FY6WlMjzG2U?si=9Io45ISSSH3IGIuM](https://www.youtube.com/live/FY6WlMjzG2U?si=9Io45ISSSH3IGIuM)
 
 ## Slightly more in-depth info for Flight Tracking
 
@@ -56,13 +56,13 @@ ADSB is messages sent out by planes and helicopters, it gives info about where t
 
 
 ## Why can I see a helicopter out my window but not online?
-There's a couple reasons a plane or helicopter might not be seen in an online ADSB aggregator websites. 
+When I first started learning about this, there were a couple times I spotted a plane or helicopter, but when I went to the adsb tracker, I didn't see anything! Turns out, there's a couple reasons a plane or helicopter might not be seen in an online ADSB aggregator websites. 
 
-The LADD flag - [LADD Program](https://www.faa.gov/pilots/ladd) was created by the FAA which lets private aircraft owers to request their aircraft's flight data be removed from general distribution. Some ADSB websites follow this flag and remove the aircraft, some do not. As of this writing, I know [adsb.lol](https://adsb.lol/) still displays them.
+- The LADD flag - [LADD Program](https://www.faa.gov/pilots/ladd) was created by the FAA which lets private aircraft owers to request their aircraft's flight data be removed from general distribution. Some ADSB websites follow this flag and remove the aircraft, some do not. As of this writing, I know [adsb.lol](https://adsb.lol/) still displays them.
 
-Their transponder is off - Some government agencies (e.g. DHS) are allowed to turn off their ADSB transponders when they're in flight on various missions. This means the ADSB data simply doesn't exist to be collected! So they can't be tracked in this way.
+- Their transponder is off - Some government agencies (e.g. DHS) are allowed to turn off their ADSB transponders when they're in flight on various missions. This means the ADSB data simply doesn't exist to be collected! So they can't be tracked in this way.
 
-Poor coverage - The ADSB aggregator websites are, in fact, aggregators of data, normally simply volunteers uploading (creating "feeders" like described below). If there's no one near enough monitoring and feeding the ADSB data to aggregators, it wont show up. That also means you're in the perfect place to help out the global aviation community!
+- Poor coverage - The ADSB aggregator websites are, in fact, aggregators of data, normally simply volunteers uploading (creating "feeders" like described below). If there's no one near enough monitoring and feeding the ADSB data to aggregators, it wont show up. That also means you're in the perfect place to help out the global aviation community!
 
 
 ## The Hardware and Setup
@@ -72,6 +72,10 @@ Hardware needed:
 - [Software Defined Radio from adafruit](https://www.adafruit.com/product/1497)
 - [raspberry pi power source](https://www.adafruit.com/product/4298)
 - SD card
+
+With everything all connected, it's a pretty compact setup I can put on my second floor windowsill. Since the airport is south of me, I put it in my south-facing window.
+
+![Picture showing the raspberry pi connected to an SDR USB which connects to a small black antenna sitting next to it, on a white windowsill](/assets/adsb-radio-setup/sdr-adsb-setup.jpg)
 
 ### Initial setup
 I found the [ADSB.im](https://adsb.im) website had a really good [setup guide](https://adsb.im/howto) that was straight-forward to follow. The biggest issue was simply trying to find the IP address on my network once the pi was booted up. For some reason the various auto-finder options weren't working, so I had to dredge up some old networking knowledge.
