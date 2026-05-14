@@ -160,7 +160,9 @@ You can directly run the script on the pi by copying it over and then using `ssh
 
 > **Don't Forget** You'll need to activate your python virtual environment before you try running it though!
 
-As it's just shy of 175 lines, I'll just include the full script below in the [Full Code](#full-code) section, for you to take a closer look. I do want to point out some interesting pieces of the script though.
+As it's just shy of 175 lines, I'll just include the full script below in the [Full Code](#full-code) section, for you to take a closer look. 
+
+I do want to point out some interesting pieces of the script.
 
 
 ### Finding the serial device
@@ -171,10 +173,10 @@ My workaround for this is to use the Product ID and Vendor ID (PID and VID) and 
 
  With this, I can look through connected USB devices and filter down to only devices that are specifically an Espressif USB JTAG/serial connection, and connect to the first one I find. Since I only ever have one ESP32 connected, it works great. 
 
-After I wrote this all up, I did some extra searching online, and did see some people solved this by [creating `udev` rules](https://loketdiversen.nl/2015/02/howto-persistent-device-names-on-raspberry-pi/) to create permenant `/dev/` mount points for their USB devices. The trade off here is that you have to do more customizing of the raspberry pi OS. I was trying to keep this to a minimum to make it easy to create more of these setups in the future, so I'm satisified with the python solution for now.
+After I wrote this all up, I did some extra searching online, and did see some people solved this by [creating `udev` rules](https://loketdiversen.nl/2015/02/howto-persistent-device-names-on-raspberry-pi/) to create permanent `/dev/` mount points for their USB devices. The trade off here is that you have to do more customizing of the raspberry pi OS. I was trying to keep this to a minimum to make it easy to create more of these setups in the future, so I'm satisified with the python solution for now.
 
 
-#### Troubleshooting
+#### Troubleshooting Finding Your Device
 
 If you want to use this script, and you're having issues with getting the right PID and VID, or you're unsure if python is actually seeing your device, this lil python script, run in the REPL can help you out:
 
@@ -263,18 +265,18 @@ Once the bash script and config file are made, you'll need to reload the `system
 Here are some useful commands around systemd for troubleshooting your setup
 
 Manually start/stop the service:
-```
+```bash
 sudo systemctl start shellscript.service
 sudo systemctl stop shellscript.service
 ```
 
 Check Current Status of the service:
-```
+```bash
 sudo systemctl status shellscript.service
 ```
 
 Toggle if the service runs at boot:
-```
+```bash
 sudo systemctl enable shellscript.service
 sudo systemctl disable shellscript.service
 ```
@@ -282,7 +284,7 @@ sudo systemctl disable shellscript.service
 
 Now, you can also see the logging output from my python script by using `journalctl`. When it's running, you can use the following command to see the logs:
 
-```
+```bash
 journalctl -u shellscript.service
 ```
 ![screenshot of the output of journalctl command, showing all print statements from the printing_to_eink.py script](/assets/raspberry-pi-and-eink/journalctl-screenshot.png)
@@ -296,25 +298,30 @@ With the service now enabled, you should be able to unplug and re-plug in the po
 Some ideas for future improvements that may or may not come to pass:
 
 - Update the script to not hard-code the PID/VID and baudrate
+    - or update to have hardcoded udev rules so the script doesn't have to hunt for the serial connection
 - make a nifty enclosure for it, either 3D printed or some other way
-- Currently the timestamp is what it thinks is CT, but since it doesn't have an internal battery, when I pull the power, the clock doesn't stay up to date. And with no internal wifi, it doesn't update time from the internet. So I'd like to either add an RTC battery, or update the timestamp to simply be time from boot
+- Currently the timestamp is what it thinks is central time, but since it doesn't have an internal battery, when I pull the power, the clock doesn't stay up to date. And with no internal wifi, it doesn't update time from the internet. So I'd like to either add an RTC battery, or update the timestamp to simply be time from boot
 
 ## Conclusion
 
+Setting up the e-ink screen and getting it running for a basic use like this was easier than I had expected. I think I probably spent more time making sure my systemd script was setup correctly than writing the python script. And I did end up using this setup a couple times while testing other devices, so it wasn't _just_ a fun project with no application. I'll definitely be keeping this e-ink screen in mind for future projects.
+
+
 ## References
 
-Adafruit's e-ink guide: https://learn.adafruit.com/2-13-in-e-ink-bonnet
+Adafruit's e-ink guide: [https://learn.adafruit.com/2-13-in-e-ink-bonnet](https://learn.adafruit.com/2-13-in-e-ink-bonnet)
 
-setting up circuitpython blinka library:
-https://learn.adafruit.com/circuitpython-on-raspberrypi-linux/installing-circuitpython-on-raspberry-pi 
+Setting up circuitpython blinka library:
+[https://learn.adafruit.com/circuitpython-on-raspberrypi-linux/installing-circuitpython-on-raspberry-pi](https://learn.adafruit.com/circuitpython-on-raspberrypi-linux/installing-circuitpython-on-raspberry-pi) 
 
-Setting udev rules on raspberry pi: https://loketdiversen.nl/2015/02/howto-persistent-device-names-on-raspberry-pi/ 
+Setting udev rules on raspberry pi: [https://loketdiversen.nl/2015/02/howto-persistent-device-names-on-raspberry-pi/](https://loketdiversen.nl/2015/02/howto-persistent-device-names-on-raspberry-pi/) 
 
 
-Setting up systemd on linux: https://tecadmin.net/run-shell-script-as-systemd-service/ 
+Setting up systemd on linux: [https://tecadmin.net/run-shell-script-as-systemd-service/](https://tecadmin.net/run-shell-script-as-systemd-service/) 
 
 ## Full Code
 
+Below is the full code for each part of this project. The Systemd configuration and bash file, and the python script.
 
 ### Systemd
 
@@ -346,7 +353,7 @@ python3 -u printing_to_eink.py
 ```
 
 ### Python Script
-Here is the `printing_to_eink.py` file that is the meat of the functionality, saved in my home directory
+Here is the `printing_to_eink.py` file that is the meat of the functionality, saved in my home directory. Note the base code was originally pulled from [Adafruit's usage guide](https://learn.adafruit.com/2-13-in-e-ink-bonnet/usage) and then modified for my particular setup.
 
 ```python
 """
@@ -524,45 +531,3 @@ try:
 except Exception as e:
     print(f"Serial connection failed {e}")
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-You will need to activate the virtual environment every time the Pi is rebooted. To activate it:
-```
-source env/bin/activate
-
-```
-
-
-"The hardware on this system lacks usupport for NEON SIMD extensions. We now require NEON or equivalent architecture extensions on ARM-based machines
-
-user, daniellet
-password, ThIsMyPiZePa!1
-
-ssh daniellet@192.168.68.112
-
-doing an lsusb:
-```
-Bus 001 Device 006: ID 303a:1001 Espressif USB JTAG/serial debug unit
-```
-
-```python
-import serial
-import serial.tools.list_ports
-for p in serial.tools.list_ports.comports():
-    print(p.pid)
-    print(p.vid)
-    print(p.manufacturer)
-```
-
-sudo systemctl stop shellscript.service
-daniellet@raspberrypi:~ $ sudo systemctl status shellscript.service
