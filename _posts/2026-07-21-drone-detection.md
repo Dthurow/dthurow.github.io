@@ -8,7 +8,7 @@ categories:
 tags:
 - side project
 - embedded
-status: draft
+status: publish
 type: post
 published: true
 toc: true
@@ -17,10 +17,10 @@ excerpt_separator: <!--more-->
 
 Drones have gotten more and more popular lately, from filming fun things on social media, [delivering packages for Amazon](https://www.aboutamazon.com/news/operations/mk30-drone-amazon-delivery-packages), being [used by law enforcements in the states](https://kstp.com/kstp-news/top-news/st-paul-police-new-drones-hit-scenes-in-under-90-seconds-surpass-last-years-drone-flights/), all the way to [being used in the ukraine war](https://www.militarytimes.com/news/pentagon-congress/2026/03/11/these-are-ukraines-1000-interceptor-drones-the-pentagon-wants-to-buy/). Understanding the technology and building tech to _track_ the drones seems very useful. We've had public tracking of airplanes via ADSB for years at this point (see my previous post [about setting up your own flight tracker with ADSB]({% post_url 2026-03-03-adsb-radio-setup %})), but no equivalent with drones. Partially this is because drones, up until recently, didn't really have ways _to_ track them, unless you were visually tracking them or doing some advanced radio frequency shenanigans. 
 
-That has changed relatively recently (in 2023) when the FAA started requiring Remote IDs for drones, the functional equivalent to the broadcast ADSB info, but for drones specifically. Specific information about the drone, its location, and the drone operator are broadcast in one of the variety of ways specified by the standard put out by the ASTM (a standards governing body), which is charmingly named "F3411". With this new ability, it's possible to start tracking and aggregating drone flight information, same as ADSB. Lets take a look at this new protocol, and poke around at some sample packets (or generate our own).
+That has changed relatively recently (in 2023) when the FAA started requiring Remote IDs for drones, the functional equivalent to the broadcast ADSB info, but for drones specifically. Specific information about the drone, its location, and the drone operator are broadcast in one of the variety of ways specified by the standard put out by the ASTM (a standards governing body), which is charmingly named "F3411". With this new ability, it's possible to start tracking and aggregating drone flight information, same as ADSB. As the FAA website shows (screenshot below), there are now several ways to be compliant with the remote ID requirements, and 2/3rds of the ways require actually broadcasting the info. Lets take a look at this new protocol, and poke around at some sample packets (or generate our own). 
 
 
-![Screenshot from the FAA website showing the 3 ways drones can be compliant with the Remote ID requirement. The drone must: have a standard remote ID built in, have a remote ID broadcaster attached to the drone, or be flying in a line-of-sight location](/assets/drones/FAA_Remote_ID_Options.png)
+![Screenshot from the FAA website showing the 3 ways drones can be compliant with the Remote ID requirement. The drone must: have a standard remote ID built in, have a remote ID broadcaster attached to the drone, or be flying within an FAA-Recognized Identification Area (FRIA), a pre-approved location where Remote ID isn't required](/assets/drones/FAA_Remote_ID_Options.png)
 
 <!--more-->
 
@@ -68,7 +68,7 @@ And in the "Service Descriptor Attribute" section, the Service ID is the first 6
 
 Here's a screenshot of the F3411 document for the NAN discovery frame. See if you can spot all the values listed above in the frame:
 
-![screenshot](/assets/drones/wifi_nan_discovery_frame.png)
+![screenshot of NAN discovery frame packet diagram](/assets/drones/wifi_nan_discovery_frame.png)
 
 Congratulations, you've now parsed enough to confirm it's a Remote ID Wifi message, and you can start processing the info! Jump down farther in this post to see what's inside. Otherwise, lets switch to a different packet option...
 
@@ -78,11 +78,11 @@ Another way to send out the remote IDs is via Wifi Beacon frames. These have a d
 
 First, take a look at the Management Header of the wifi frame, like last time. Looking in the Frame Control section again, you'll need to verify the Type is "management" `0x0`, Subtype is "Beacon" `0x8`. 
 
-INow this is where the format changes. Inside the Beacon is several required fields, followed by a series of Information Elements that is basically a series of key/value pairs with info the Beacon wants to share. In our case, we want remote ID beacon info. So we need to look through the beacon's Information Element "tags" (which are the keys in the key/value idea), for `0xdd`, the Vendor Specific Information element type. Then verify the start of the info in that tag (the "value" in the key/value idea) is the ASTM OUI, `FA:0B:BC`. We also want to check the type after the OUI is in there and is set to `0x0D`, which indicates a Remote ID app code. 
+Now this is where the format changes. Inside the Beacon is several required fields, followed by a series of Information Elements that is basically a series of key/value pairs with info the Beacon wants to share. In our case, we want remote ID beacon info. So we need to look through the beacon's Information Element "tags" (which are the keys in the key/value idea), for `0xdd`, the Vendor Specific Information element type. Then verify the start of the info in that tag (the "value" in the key/value idea) is the ASTM OUI, `FA:0B:BC`. We also want to check the type after the OUI is in there and is set to `0x0D`, which indicates a Remote ID app code. 
 
 Here's a screenshot with an example of this packet in wireshark. The left side is the parsed packet with the field names and values, and the right side is the raw packet. Note the type/subtype at the top, the Vendor Specific Information Element type, and the OUI listed there. 
 
-![screenshot](/assets/drones/pcap_wifi_beacon.png)
+![screenshot of wireshark showing an expanded, parsed beacon packet](/assets/drones/pcap_wifi_beacon.png)
 
 > **NOTE** If you haven't done much with wireshark, highly recommend finding some tutorials and poking around in things. It's amazing for parsing packets of all sorts of protocols, I've found endless use for it, from my web dev days, to now.
 
@@ -98,16 +98,16 @@ BLE 4 uses advertising beacon messages, called “Legacy Advertising” in the A
 
 To filter down to the remote ID messages, we need to grab all Advertising beacon messages, and check the "AD info" field. That will contain the Mfg Code, which should be `0xFFFA`, the ASTM code. It will also contain the "AD App" field, which should be `0x0D`, for remote ID. The content in this advertising message will be what we want. Here's another screenshot from the ASTM F3411 spec, showing those fields in the packet:
 
-![screenshot](/assets/drones/ble4_beacon_frame.png)
+![screenshot of ble beacon frame packet diagram](/assets/drones/ble4_beacon_frame.png)
 
 ### Bluetooth 5  
-Bluetooth 5 Extended Advertisements messages, when sent on a LE Coded (S=8) PHY, can increase the range of the advertisements by a factor of 4, which is why it's so nice. It achieves this by cutting the rate of the data transfer down (with S=8, data rate is 1/8th), where multiple symbols make up 1 bit (with S=8... it's eight symbols), this lets the receiver be able to parse things from a farther distance. 
+Bluetooth 5 Extended Advertisements messages, when sent on a LE Coded (S=8) PHY, can increase the range of the advertisements by a factor of 4, which is why it's so nice. It achieves this by cutting the rate of the data transfer down (with S=8, data rate is 1/8th), where multiple symbols make up 1 bit (with S=8... it's eight symbols per bit), this lets the receiver parse things from a farther distance. 
 
 These Extended advertisements also use a two-step advertisement messages, because it uses the advertisement types `ADV_EXT_IND` and `AUX_ADV_IND`. So  they send advertisements on the normal advertising channels like BLE 4, but those advertisements actually point to larger advertisement packets on other bluetooth channels. This second, larger advertisement frame will have the actual remote ID information. Like the BLE 4 protocol, it will contain the Mfg Code, which should be `0xFFFA` and the "AD App" field, which should be `0x0D`.
 
 Because the secondary advertisement frame is larger, the remote ID information will be sent as a "message pack" type, which combines different remote ID messages into one large packet.
 
-![screenshot](/assets/drones/ble5_beacon_frame.png)
+![screenshot of the secondary ble advertising packet, which has a larger payload](/assets/drones/ble5_beacon_frame.png)
 
 
 What are these "message pack" and other remote ID message types? I'm glad you asked...
@@ -149,17 +149,17 @@ You've learned a bunch of protocol things, but what can you actually _do_ with i
 The basic steps for this are:
 
 - Install Wireshark, setup so non-root users can capture packets
-- Install custom protocol dissector linked above, to parse Remote IDs
+- Install [custom protocol dissector]((https://github.com/opendroneid/wireshark-dissector/tree/main)), to parse Remote IDs
 - Plug a wifi or bluetooth dongle into your computer
     - if it's a wifi dongle, make sure it supports "monitor" mode and set the 2.4GHz channel to "6"
     - other setups can be found in the readme of the protocol dissector
 - Run wireshark
-- Fly a drone that broadcasts Remote ID on the channel you're lisenting on (e.g.2.4GHz channel 6)
+- Fly a drone that broadcasts Remote ID on the channel you're lisenting on (e.g. 2.4GHz channel 6)
 - Capture packets
 - Profit!
 
 
-On my linux laptop, these commands were useful to setup my wifi dongle, a [Panda PAU0F](https://www.pandawireless.com/pandaAXE3000dualant.html) to monitor mode on channel 6. Note the interface name `wlx9cefd5f644bd` will be different for you, determine by simply running `sudo ifconfig` with the wifi dongle unplugged and then plugged in, and see what interface appears.
+On my linux laptop, these commands were useful to setup my wifi dongle, a [Panda PAU0F](https://www.pandawireless.com/pandaAXE3000dualant.html) to monitor mode on channel 6. Note the interface name `wlx9cefd5f644bd` will be different for you, determine by simply running `sudo ifconfig` with the wifi dongle unplugged and then plugged in, and see what interface appears. These commands: take the interface down so I can modify the configuration, set the monitor flag, bring the interface back up, and set it to monitor channel 6.
 
 ```bash
 sudo ifconfig wlx9cefd5f644bd down
@@ -169,6 +169,7 @@ sudo ifconfig wlx9cefd5f644bd up
 sudo iw dev wlx9cefd5f644bd set channel 6
 ```
 
+> **NOTE** not all wifi dongles can be set to monitor mode! You'll have to research before you buy. Acrylic wifi has a list of monitor mode dongles that may work with your computer [here](https://www.acrylicwifi.com/en/wifi-analyzer/requirements-and-compatibility/)
 
 ## Conclusion
 
@@ -185,3 +186,5 @@ ASTM F3411 Wi-Fi Beacon protocol doc [https://thedroneprofessor.com/wp-content/u
 Setting a wifi interface to monitor mode: [https://www.geeksforgeeks.org/linux-unix/how-to-put-wifi-interface-into-monitor-mode-in-linux/](https://www.geeksforgeeks.org/linux-unix/how-to-put-wifi-interface-into-monitor-mode-in-linux/)
 
 Wireshark dissector of drone IDs [https://github.com/opendroneid/wireshark-dissector/tree/main](https://github.com/opendroneid/wireshark-dissector/tree/main)
+
+Monitor mode wifi dongles: [https://www.acrylicwifi.com/en/wifi-analyzer/requirements-and-compatibility/](https://www.acrylicwifi.com/en/wifi-analyzer/requirements-and-compatibility/)

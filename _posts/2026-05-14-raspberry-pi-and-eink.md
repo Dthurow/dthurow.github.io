@@ -8,7 +8,7 @@ categories:
 tags:
 - side project
 - embedded
-status: draft
+status: publish
 type: post
 published: true
 toc: true
