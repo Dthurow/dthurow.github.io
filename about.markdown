@@ -10,16 +10,18 @@ meta: {}
 ---
 
 
-I graduated from Western Washington University March 2015 with a BS in CS and a minor in math, and have been moving closer to the hardware since. Started as a web developer and moved into embedded systems.  In my spare time, I play with infosec, reverse engineering, learning Japanese, and whatever else catches my fancy.
+I graduated from Western Washington University March 2015 with a BS in CS and a minor in math, and have been moving closer to the hardware ever since. I started as a web developer and have moved into embedded systems. In my spare time, I play with infosec, reverse engineering, radio frequencies, and whatever else catches my fancy.
 
 
 ## Education
 
-### Degree
+### Degree and Certs
 
 **Bachelors of Science in Computer Science with a Minor in Mathematics**
 * from Western Washington University. Graduated March 2015 with 3.5 GPA
 
+**Electronics Technician Certificate**
+* from Hennepin Technical College, May 2026
 
 ## Personal Projects
 
@@ -46,7 +48,7 @@ I graduated from Western Washington University March 2015 with a BS in CS and a 
 **2024 through 2025**
 
 - Worked on Zephyr and Free RTOS projects
-- Led deep dive in CAN Hardware configuration to improve CAN FD comms
+- Led a deep-dive in CAN Hardware configuration to improve CAN FD comms
 - Firmware testing automation work with pyVISA and SCPI
 - Member of Modernization working committee
 

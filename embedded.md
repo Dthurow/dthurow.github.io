@@ -1,5 +1,6 @@
 ---
 layout: page
+title: Embedded Projects
 categories: []
 tags: []
 status: publish
