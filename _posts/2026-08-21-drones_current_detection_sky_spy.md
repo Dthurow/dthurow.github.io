@@ -8,6 +8,7 @@ categories:
 tags:
 - side project
 - embedded
+- remote ID
 status: publish
 type: post
 published: true
@@ -15,24 +16,24 @@ toc: true
 excerpt_separator: <!--more-->
 ---
 
-Since the [previous blog post]({% post_url 2026-07-21-drone-detection %}) talked about the Remote ID protocol and how it was broadcast, you might now want to actually _listen_ to those Remote ID messages around your home. There's certainly commercial-grade solutions for that, but maybe you don't want to drop a thousand dollars or book a meeting with a company so you can buy it, all for a fun sidequest. Instead, lets look for some slightly cheaper and easier to access options, and see what Remote ID functionality they support, and what they don't. 
+Since I [already talked]({% post_url 2026-07-21-drone-detection %}) about the Remote ID protocol and how it was broadcast, you might now want to actually _listen_ to those Remote ID messages around your home. There's certainly commercial-grade solutions for that, but maybe you don't want to drop a thousand dollars or book a meeting with a company so you can buy it, all for a fun sidequest. Instead, lets look for some slightly cheaper and easier to access options, and see what Remote ID functionality they support, and what they don't. 
 
-First up: Colonel Panic's [Sky-Spy](https://github.com/colonelpanichacks/Sky-Spy) code! With bonus of some forked code that I've started working on!
+First up: The first drone detection hardware/firmware I came across, Colonel Panic's [Sky-Spy](https://github.com/colonelpanichacks/Sky-Spy)! I'll review the hardware and firmware functionality, how to DIY the hardware if you're feeling cheap, and include a bonus of some forked code that I've started working on!
 
 ...I had originally planned on doing one overview post of all current available options...but then I got nerdsniped. So I'll be going more in-depth on each.
 
-![Sky-Spy's logo](/assets/drones_current_detection/eagle.png)
+![Sky-Spy's logo, ASCII black and white art of a bird of prey attacking a quadcopter drone](/assets/drones_current_detection/eagle.png)
 
 
 <!--more-->
 
 > **NOTE** Highly recommend reading my previous post about the remote ID transmission types, if you haven't already. This post assumes you know about that already.
 
-## Overview
+## Overview - Functionality and Code Review
 
-[Colonel Panic](https://colonelpanic.tech/) has several fun pieces of hardware, including their OUI-SPY, which was originally setup as a general BLE scanner, but was re-purposed by them as a drone detector as well. They used their hardware with a custom code base called [Sky-Spy](https://github.com/colonelpanichacks/Sky-Spy). This was the first drone detection hardware I came across. Colonel Panic has a lot of other cool firmware setup for the OUI-Spy as well, such as the [Unified Blue](github.com/colonelpanichacks/oui-spy-unified-blue) firmware that combines a lot of different functionality into one codebase.
+[Colonel Panic](https://colonelpanic.tech/) has several fun pieces of hardware, including their OUI-SPY, which was originally setup as a general BLE scanner, but was re-purposed by them as a drone detector as well. The custom hardware currently uses a Xiao ESP32-S3, a piezo buzzer, and custom PCBs to make a nice little handheld device. They used their hardware with a custom code base called [Sky-Spy](https://github.com/colonelpanichacks/Sky-Spy) (The image above is the logo from that firmware). Colonel Panic has a lot of other cool firmware setup for the OUI-Spy as well, such as the [Unified Blue](github.com/colonelpanichacks/oui-spy-unified-blue) firmware that combines a lot of different functionality into one codebase.
 
-The custom hardware currently runs on the Xiao ESP32-S3, and only scans BLE 4 and 2.4GHz. It does check for Wifi NAN and beacon frames though, so it covers 3 out of possible 6 transmission types. How do I know? By looking at the current hardware and firmware. 
+ In the previous post, I talked about all the potential ways drones can broadcast: BLE 4 and 5 advertising packets, and 2.4/5G Wifi beacon and NAN frames. Based on my research, the OUI-Spy covers 3 out of possible 6 transmission types. How do I know? By looking at the current hardware and firmware. Lets take a look!
 
 > **NOTE** They're pretty active with development, so some of my research may be moot soon. **BUT** if you know how and where to look for this info now, you'll be able to take a look at the latest code and compare!
 
@@ -40,9 +41,11 @@ The custom hardware currently runs on the Xiao ESP32-S3, and only scans BLE 4 an
 
 For BLE, we first check if the hardware can handle 4 and 5, then look at the code. The hardware is easy, espressif specifically says ESP32S3's can use both BLE 4 and 5. 
 
-For the firmware side, can see it's using pretty standard espressif setup for BLE advertisements. However, it's not setup for the BLE 5 extended advertising packets, which we can see by looking at the BLE 5 example code from espressif.
+For the firmware side, we can see it's using pretty standard espressif setup for BLE advertisements. However, it's not setup for the BLE 5 extended advertising packets, which can be checked by looking at the BLE 5 example code from espressif.
 
-> **Want to follow along?** The main Sky-spy code can be found here: [https://github.com/colonelpanichacks/Sky-Spy](https://github.com/colonelpanichacks/Sky-Spy)
+
+> **Want to look at the code and follow along?** The main Sky-spy code can be found here: [https://github.com/colonelpanichacks/Sky-Spy](https://github.com/colonelpanichacks/Sky-Spy)
+
 
 Here's the callback in Sky-Spy:
 ```c++
@@ -64,10 +67,13 @@ And the BLE initialization in Sky-Spy:
   pBLEScan->setActiveScan(true);
 ```
 
-The Espressif example code for extended advertising, meanwhile, is here:
+Lets compare that with the Espressif example code for extended advertising.
+
+> **NOTE** The example code lives here:
 [https://github.com/espressif/arduino-esp32/blob/master/libraries/BLE/examples/BLE5_extended_scan/BLE5_extended_scan.ino](https://github.com/espressif/arduino-esp32/blob/master/libraries/BLE/examples/BLE5_extended_scan/BLE5_extended_scan.ino)
 
-Here's Espressif's callback, note it's implementing a different class's `onResult`, the `BLEExtAdvertisingCallbacks` class:
+
+Here's Espressif's callback, note it's inheriting from a differenc class, `BLEExtAdvertisingCallbacks`, and the `onResult` argument type is different:
 ```c++
 class MyBLEExtAdvertisingCallbacks : public BLEExtAdvertisingCallbacks {
   void onResult(esp_ble_gap_ext_adv_report_t report) {
@@ -92,17 +98,21 @@ And here's the initialization for extended advertising, note it's setting the ex
   pBLEScan->startExtScan(scanTime, 3);  // scan duration in n * 10ms, period - repeat after n seconds (period >= duration)
 ```
 
-So this comparison shows that Sky-Spy is capturing the BLE standard advertising packets, but not the extended ones. However, the espressif example appears to get both legacy and extended advertising, which means this hardware could actually capture both. I plan on looking into this for my custom fork of this code (more below).
+So this research shows: **Sky-Spy is capturing the BLE standard advertising packets, but not the extended ones**.
+
+However, the espressif example appears to get both legacy and extended advertising, which means this hardware could actually capture both. I plan on looking into this for my custom fork of this code (more below).
 
 
 ### 5G Wifi
 
-For determining if it supports 5G, we once again start with looking at the hardware. The ESP32-S3 hardware fact sheet shows it does not support 5G wifi. The ESP32S3 only has 2.4 GHz Wi-Fi (IEEE 802.11b/g/n) and Bluetooth® 5 (LE). The new [ESP32-C5](https://www.espressif.com/en/products/socs/esp32-c5) _does_ support 5GHz wifi, and according to Espressif is the "first RISC-V MCU that supports 2.4 and 5 GHz dual-band Wi-Fi 6, along with Bluetooth 5 (LE) and IEEE 802.15.4 (Zigbee, Thread) connectivity". So this may be a hardware upgrade for the future. And in fact Colonel panic's repo has a sub-folder that looks to include some work done on the XIAO seeed ESP32C5 [https://github.com/colonelpanichacks/Sky-Spy/tree/main/xiao-c5-5g](https://github.com/colonelpanichacks/Sky-Spy/tree/main/xiao-c5-5g). So maybe this is a future upgrade for OUI-Spy?
+For determining if it supports 5G, we once again start with looking at the hardware. The ESP32-S3 hardware fact sheet shows it does not support 5G wifi. So this research shows: **The ESP32-S3 only has 2.4 GHz Wi-Fi and BLE 5**. 
+
+The new [ESP32-C5](https://www.espressif.com/en/products/socs/esp32-c5) _does_ support 5GHz wifi, and according to Espressif is the "first RISC-V MCU that supports 2.4 and 5 GHz dual-band Wi-Fi 6, along with Bluetooth 5 (LE) and IEEE 802.15.4 (Zigbee, Thread) connectivity". So this may be a hardware upgrade for the future. And in fact Colonel panic's repo has a sub-folder that looks to include some work done on the XIAO seeed ESP32C5 [https://github.com/colonelpanichacks/Sky-Spy/tree/main/xiao-c5-5g](https://github.com/colonelpanichacks/Sky-Spy/tree/main/xiao-c5-5g). So maybe this is a future upgrade for OUI-Spy?
 
 
 ### 2.4G Wifi
 
-We've already confirmed he ESP32S3 has 2.4 GHz Wi-Fi (IEEE 802.11b/g/n), so lets jump right to the firmware. Here we have to confirm both NAN and beacon frames are parsed.
+We've already confirmed the ESP32S3 has 2.4 GHz Wi-Fi, so lets jump right to the firmware. Here we have to confirm both NAN and beacon frames are parsed.
 
 First, the initialization, setting up the wifi module to be in promiscuous mode and scanning Channel 6:
 
@@ -115,7 +125,7 @@ First, the initialization, setting up the wifi module to be in promiscuous mode 
   esp_wifi_set_channel(6, WIFI_SECOND_CHAN_NONE);
 ```
 
-The `callback` function it references checks the packets to see if they're NAN or beacon and parses them as needed. The first `if` statement short circuits if the wifi packet isn't a management packet. It then checks if the destination address is the NAN address, or if the management frame's type is `0x80`, the beacon type.
+Looking at the `callback` function it references, it checks the packets to see if they're NAN or beacon and parses them as needed (snippet below). The first `if` statement short circuits if the wifi packet isn't a management packet. It then checks if the destination address is the expected NAN address, or if the management frame's type is `0x80`, the beacon type.
 
 ```c++
 void callback(void *buffer, wifi_promiscuous_pkt_type_t type) {
@@ -137,13 +147,18 @@ void callback(void *buffer, wifi_promiscuous_pkt_type_t type) {
 }
 ```
 
+Using those two things as the way to check for NAN or Beacon frames is a bit odd, but does show **Sky-Spy parses Wifi NAN and Beacon Frames in 2.4G Wifi**.
+
 
 ### Parsing Remote ID protocols
 
 Something I like about this codebase is that it uses the open remote ID library: [https://github.com/opendroneid/opendroneid-core-c](https://github.com/opendroneid/opendroneid-core-c) for parsing the received messages. This parsing library was originally put together by Gabriel Cox, who was "leading the ASTM UAS Remote ID workgroup (as Chairman) consisting of industry and government stakeholders to bring a consensus standard solution and Means of Compliance (MOC) for Remote ID." (quote pulled from [his company website](https://coxdatalabs.com/about/)). It also claims in the README to be compliant with the updated F3411-22a, the version of the specification that currently does not appear to be available online unless you pay ASTM for the pleasure.
 
-I wanted to call this out specifically, because some other solutions look to use custom parsing instead of a library, which has its own trade-offs. 
+I wanted to call this out specifically, because some other solutions look to use custom parsing instead of a library, which has its own trade-offs.
 
+### Sky-Spy Functionality Conclusion
+
+You can see above then that the Sky-Spy firmware and the OUI-Spy can detect a subset of ways the drones transmit remote IDs: BLE 4, and 2.4G Wifi Beacon and NAN frames. This means, for example, DJI drones that broadcast on 2.4G Wifi will be heard, but Skydio drones that use 5G-only will not. With the custom hardware currently $85 on Colonel Panic's website, that may be too steep a price for you, for the functionality given. If you're feeling handy (which you may be, since you're reading this), I do want to mention Colonel Panic does give enough info you can do a DIY OUI-Spy device, which may make the trade-off worth it for you.
 
 ## Setup with DIY Hardware
 
@@ -153,9 +168,20 @@ I picked up a 3-pack of the ESP32S3's, since it was a bit cheaper per-board: [ht
 
 And piezo buzzers are pretty interchangeable, but I grabbed these: [https://www.digikey.com/en/products/detail/tdk/PS1720P02/935932](https://www.digikey.com/en/products/detail/tdk/PS1720P02/935932)
 
-I then followed the notes in Colonel Panic's README to wire up the correct pins on the dev board to the piezo buzzer, and soldered it all together on a piece of perf board. Below are some pictures of my final product! 
+Then you just connect the buzzer to the ESP32-S3 on the right pins (ground and the pin the firmware uses). To keep it all together, I used a small chunk of [bakelite perf board](https://www.adafruit.com/product/2670) I had bought ages ago from adafruit, and some solid core wire. I routed the wire under the ESP32-S3, so it was as small of footprint as I could make it. 
 
-> **Note** I've added a larger antenna as my external antenna for the Wifi, since I had one lying around. You can just use the small antenna that comes with the Xiao ESP32S3, you'll probably just get a smaller range with it.
+
+| ESP32-S3   | Connection |
+|------------|-------------|
+| GPIO Pin 3 | Piezo Buzzer |
+| Ground     | Piezo Buzzer|
+
+
+With the hardware put together, I just had to flash the firmware onto it. I had to make sure VSCode was installed, and the platform IO extension was loaded in VSCode. Then I cloned the Sky-Spy repo, and did a basic platform IO build and upload, while my device was plugged in with a data USB-C cable. And voila, a functioning drone detector!
+
+Below are some pictures of my final product! 
+
+> **Note** I've added a larger antenna as my external antenna for the Wifi, since I had one lying around. You can just use the small antenna that comes with the Xiao ESP32-S3, you'll probably just get a smaller range with it.
 
 ![Picture of a large omni-directional antenna connected with a black wire to a small development board, next to a piezo buzzer, on a blue background. You can just barely see that the development board and buzzer are on a brown perf board that has clearly been cut to a small size.](/assets/drones_current_detection/colonel_panic_xiao_esp32s3.jpg)
 
@@ -164,7 +190,7 @@ And the back side to see my "better than good, it's good enough" soldering on th
 
 ## My Modified Codebase
 
-I forked Colonel Panic's codebase and started adding support for other hardware types. Codebase is [here](github.com/Dthurow/Sky-Spy). So far I've added and tested the Adafruit TFT reverse feather and a Lilygo T Dongle S3.
+I can never leave well enough alone, so I forked Colonel Panic's codebase and started adding support for other hardware types. Codebase is [here](https://github.com/Dthurow/Sky-Spy). So far I've added and tested the Adafruit TFT reverse feather and a Lilygo T Dongle S3.
 
 I also plan to upgrade the codebase to support both legacy and extended advertising BLE packets. As well as take some of the code changes from the [Flock-you](https://github.com/colonelpanichacks/flock-you) codebase that Colonel Panic also made. Mainly writing to memory for detection retention through power-loss.
 
@@ -190,9 +216,9 @@ The detection dump button triggers outputting all detections as json over serial
 
 ### Hardware - Adafruit TFT reverse feather
 
-This gives a display to play with, to show drone detections immediately, some buttons, and of course an external antenna option.
+This gives a display to play with, to show drone detections immediately, some buttons, and of course an external antenna option. If you wanted, you could keep the buzzer by buying one and wiring it up to a free GPIO, there's definitely room, but I haven't gotten around to that yet, I was too excited by the display.
 
-Here's a link to the hardware list on adafruit: [https://www.adafruit.com/wishlists/622656](https://www.adafruit.com/wishlists/622656). The total is about 48 dollars, but if you want to skip the battery, or buy the internal antenna option, you could cut the price down considerably. Though this comes with funcitonality trade offs, of course.
+Here's a link to the hardware list on adafruit: [https://www.adafruit.com/wishlists/622656](https://www.adafruit.com/wishlists/622656). The total is about 48 dollars, but if you want to skip the battery, or buy the internal antenna option, you could cut the price down considerably. Though this comes with functionality trade offs, of course.
 
 A nice benefit from using the Adafruit TFT reverse feather is that it comes with a battery charger chip onboard, and a JST connector for a lipoly battery. Which means it's super easy to power with _either_ an external USB-C connector, or with an internal battery, for portability. I'm currently using the very advanced prototyping functionality of "cardboard boxes" to create a custom enclosure for this hardware, but someone with 3d printing knowledge could probably knock out a slick case for it pretty fast. 
 
@@ -224,9 +250,11 @@ Another benefit of this is that it has a built in spot for a tiny SD card, funni
 
 A neighbor was kind enough to fly a drone around for me, to let me test out some ranges of different solutions. He had a DJI drone, and we tested it around my neighborhood, which is relatively flat, with 2-story buildings and some trees. This is important context since wifi and bluetooth are both affected by things in the way, so if you live someplace where there's no trees and hills, you'll get better range than, say, hilly and tree-covered seattle. Where and how big the antenna is will affect range too. If you or the drone are higher up, you'll get a better line-of-sight (or line-of-signal, I suppose) and so better range.
 
-With my smaller antenna, at ground level, with the drone flying between 100 and 300 feet above ground level, my sky-spy setup can detect drones about 500-800 feet away.
+With my smaller antenna, at ground level, with the drone flying between 100 and 300 feet above ground level, my sky-spy setup can detect drones about 500-800 feet away consistently.
 
 This is one day of testing, so there's definitely wriggle room in that number, but it feels very promising considering I hadn't tested if it worked at all yet! 
+
+There's other drone detection setups out there (though not that many), but this project has a relatively low cost of entry with decent range of detection. I feel either Colonel Panic's or my codebase will continue to improve, too, making it a project to watch. 
 
 ## References
 
@@ -234,8 +262,10 @@ Colonel Panic: [https://colonelpanic.tech/](https://colonelpanic.tech/)
 
 Sky-Spy: [github.com/colonelpanichacks/Sky-Spy](github.com/colonelpanichacks/Sky-Spy)
 
-Custom codebase: [github.com/Dthurow/Sky-Spy](github.com/Dthurow/Sky-Spy)
+My Modified codebase: [https://github.com/Dthurow/Sky-Spy](https://github.com/Dthurow/Sky-Spy)
 
 Adafruit TFT reverse feather drone kit: [https://www.adafruit.com/wishlists/622656](https://www.adafruit.com/wishlists/622656)
+
+Lilygo T Dongle S-3: [https://www.microcenter.com/product/703093/lilygo-t-dongle-s3-esp32-s3-ttgo-development-board-with-screen](https://www.microcenter.com/product/703093/lilygo-t-dongle-s3-esp32-s3-ttgo-development-board-with-screen)
 
 open remote ID library: [https://github.com/opendroneid/opendroneid-core-c](https://github.com/opendroneid/opendroneid-core-c)

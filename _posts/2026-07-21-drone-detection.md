@@ -8,6 +8,7 @@ categories:
 tags:
 - side project
 - embedded
+- remote ID
 status: publish
 type: post
 published: true
