@@ -15,6 +15,9 @@ toc: true
 excerpt_separator: <!--more-->
 ---
 
+* TOC
+{:toc}
+
 Playing around with different development projects, there's often a need to listen on a USB serial port connection to see log outputs. If I'm making a device that I want to test out in the wild, without a full display yet, it'd be nice to have a grab-and-go tool for that. So, I decided to put together a raspberry pi zero I had lying around, plus the [adafruit e-ink bonnet](https://www.adafruit.com/product/4687) and a powerbank, to let me read serial logs on the road.
 
 ![Picture of the raspberry pi with the E-ink screen connected, displaying a timestamp and "Device is active and scanning". It is connected to a white powerbank, and a Xiao ESP32S3 soldered onto perfboard with a piezo buzzer](/assets/raspberry-pi-and-eink/e-ink-setup.jpg)

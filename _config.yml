@@ -34,7 +34,6 @@ theme: minima
 show_excerpts: true
 plugins:
   - jekyll-feed
-  - jekyll-toc
 markdown: kramdown
 highlighter: rouge
 google_analytics: G-1L2T8RB5GH

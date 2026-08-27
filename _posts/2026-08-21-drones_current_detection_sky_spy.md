@@ -16,6 +16,9 @@ toc: true
 excerpt_separator: <!--more-->
 ---
 
+* TOC
+{:toc}
+
 Since I [already talked]({% post_url 2026-07-21-drone-detection %}) about the Remote ID protocol and how it was broadcast, you might now want to actually _listen_ to those Remote ID messages around your home. There's certainly commercial-grade solutions for that, but maybe you don't want to drop a thousand dollars or book a meeting with a company so you can buy it, all for a fun sidequest. Instead, lets look for some slightly cheaper and easier to access options, and see what Remote ID functionality they support, and what they don't. 
 
 First up: The first drone detection hardware/firmware I came across, Colonel Panic's [Sky-Spy](https://github.com/colonelpanichacks/Sky-Spy)! I'll review the hardware and firmware functionality, how to DIY the hardware if you're feeling cheap, and include a bonus of some forked code that I've started working on!
@@ -26,6 +29,8 @@ First up: The first drone detection hardware/firmware I came across, Colonel Pan
 
 
 <!--more-->
+
+
 
 > **NOTE** Highly recommend reading my previous post about the remote ID transmission types, if you haven't already. This post assumes you know about that already.
 

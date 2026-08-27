@@ -16,6 +16,9 @@ toc: true
 excerpt_separator: <!--more-->
 ---
 
+* TOC
+{:toc}
+
 Radio has always been a side interest of mine, but seemed too convoluted for me to easily get into. However, now with Software-Defined Radios (SDR), things started to shift into the software world, so I started to get my toes wet. One use that seemed pretty popular was tracking airplanes, so I thought I'd give it a go.
 
 I had previously setup an ADSB receiver using the [adsb exchange raspberry pi image](https://www.adsbexchange.com/how-to-feed/adsbx-custom-pi-image/), and found it a little finicky. I also had other uses for the pi, so I ended up retiring that setup, with the eventual plan to get it back up and running "sometime in the future". Which turns out is around now! (don't...don't ask how long it was since I did that setup the first time)
