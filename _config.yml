@@ -28,6 +28,7 @@ url: "" # the base hostname & protocol for your site, e.g. http://example.com
 github_username:  dthurow
 linkedin_username: danielle-thurow-a0934884
 rss: RSS
+kofi: https://ko-fi.com/Q2C325UV42
 permalink: /blog/:year/:i_month/:i_day/:title
 
 # Build settings
