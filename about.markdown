@@ -10,7 +10,9 @@ meta: {}
 ---
 
 
-I graduated from Western Washington University March 2015 with a BS in CS and a minor in math, and have been moving closer to the hardware ever since. I started as a web developer and have moved into embedded systems. In my spare time, I play with infosec, reverse engineering, radio frequencies, and whatever else catches my fancy.
+I graduated from Western Washington University March 2015 with a BS in CS and a minor in math, and have been moving closer to the hardware ever since. I've recently gotten an Electronic Technician Certificate from Hennepin Tech and been enjoying volunteering at Fixit Clinics in my city, as well as getting into radio communications like lora or ham radio.
+
+In my spare time, I play with infosec, reverse engineering, radio frequencies, and whatever else catches my fancy.
 
 
 ## Education
@@ -27,20 +29,17 @@ I graduated from Western Washington University March 2015 with a BS in CS and a 
 
 ### Embedded
 
+* Did a deep dive into [Remote ID for tracking drones]({% post_url 2026-07-21-drone-detection %})
+* Set up an [ADSB Flight Tracker feeder node]({% post_url 2026-03-03-adsb-radio-setup %})
+* Made a [noise maker using 555 timers]({% post_url 2026-09-08-analog-noise-machines %})
 * Programmed an ATmega328p from an Arduino Uno, without using the Arduino ecosystem
     * [Taking it off the Uno and using a programmer]({% post_url 2021-05-25-directly-programming-an-atmega328p-from-an-arduino-uno %})
     * [Getting rid of the Arduino IDE]({% post_url 2021-06-08-programming-an-atmega328p-without-the-arduino-ide %})
 * Did some intro reverse engineering of a modem 
     * [Explored the software]({% post_url 2021-02-23-2021-2-23-netgear-dm-200-modem-breakdown-the-software-side %})
     * [Found test ports and got a serial command line with bus pirate]({% post_url 2021-05-13-netgear-dm-200-modem-breakdown-the-hardware-side %})
-* [Created an interactive game of life with a neotrellis]({% post_url 2020-09-01-2020-9-1-game-of-life-on-the-neotrellis-m4-express %})
-* [Took apart a printer and replaced a nintendo switch joystick]({% post_url 2020-09-10-2020-9-10-taking-things-apart-for-fun-and-well-mainly-fun %})
 * Completed Udemy course on [Unit testing and the Unity framework](https://www.udemy.com/course/unit-testing-and-other-embedded-software-catalysts/), written by the authors of [Throw the Switch](http://www.throwtheswitch.org/), a community that "wants to unleash the awesomely flexible power of C on our Embedded Systems without fearing the dangers"
 ![Image of Udemy Certificate of Completion](/assets/unitTestingCertificate.jpg)
-
-### Web technologies
-* [Learned Node.js]({% post_url 2020-07-23-2020-7-16-building-a-nodejs-and-vue-app-part-1-nodejs-server %})
-* [Created a working docker file to run .NET Core on heroku]({% post_url 2020-07-09-2020-7-9-running-net-core-in-heroku %})
 
 ## Work
 
