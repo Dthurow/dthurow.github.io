@@ -27,6 +27,7 @@ That has changed relatively recently (in 2023) when the FAA started requiring Re
 ![Screenshot from the FAA website showing the 3 ways drones can be compliant with the Remote ID requirement. The drone must: have a standard remote ID built in, have a remote ID broadcaster attached to the drone, or be flying within an FAA-Recognized Identification Area (FRIA), a pre-approved location where Remote ID isn't required](/assets/drones/FAA_Remote_ID_Options.png)
 
 <!--more-->
+{% include series-index.html content="remote ID" %}
 
 ## Remote ID Basics
 

@@ -17,6 +17,7 @@ excerpt_separator: <!--more-->
 ---
 
 
+
 * TOC
 {:toc}
 
@@ -27,6 +28,7 @@ The next setup for tracking Remote IDs I want to take a dive into is [droneaware
 
 
 <!--more-->
+{% include series-index.html content="remote ID" %}
 
 
 > **NOTE** They're pretty active with development, so some of my research may be moot soon. **BUT** if you know how and where to look for this info now, you'll be able to take a look at the latest code and compare!
@@ -37,23 +39,26 @@ The next setup for tracking Remote IDs I want to take a dive into is [droneaware
 > **NOTE** want to follow along? The code is at [https://github.com/fduflyer/DroneAware-Node-Releases](https://github.com/fduflyer/DroneAware-Node-Releases)
 
 ### BLE 4 and 5
-The dongle I'm currently using is the Parani-UD100, which only supports bluetooth 4.0, so it it doesn't support the BLE 5 extended advertising.
+
+For BLE, we first check if the hardware can handle 4 and 5, then look at the code. The dongle I'm currently using is the Parani-UD100, which only supports bluetooth 4.0, so it it doesn't support the BLE 5 extended advertising. _However_ we can look at the code and configuration to see if I could upgrade my dongle and then get BLE 5 as well.
 
 Droneaware uses Bleak for scanning, which on linux, uses BlueZ as the backend. If you've used BlueZ on linux for things, then you know... poking around here gets confusing fast.
 
-Bleak talks with BlueZ via the d-bus, an inter-process communication program on linux. From Bleak's github, you can see a [issue with telling if an advertising packet is extended or not](https://github.com/hbldh/bleak/issues/1347). Basically, Bleak doesn't clarify if an advertisement is extended or not, BUT, it's talking with BlueZ. So then the question is: does BlueZ support BLE 5 extended advertising? And after digging into this for a while, the answer seems to be: _probably_. 
+Bleak talks with BlueZ via the d-bus, an inter-process communication program on linux. From Bleak's github, you can see an [issue with telling if an advertising packet is extended or not](https://github.com/hbldh/bleak/issues/1347). Basically, Bleak doesn't clarify if an advertisement is extended or not, BUT, it's talking with BlueZ. So then the question is: does BlueZ support BLE 5 extended advertising? And after digging into this for a while, the answer seems to be: _probably_. 
 
 Which is an annoying answer to have.
 
 The current [BlueZ website](https://bluez.github.io/) says it has "support for Core Specification features up to 6.0", so that should include extended advertising. But if you download the code and do some grepping around [https://github.com/bluez/bluez](https://github.com/bluez/bluez), a lot of places that you would think should have support for extended advertising (e.g. `le_adv_report_evt` that `btmon` uses to display HCI events), there isn't an extra line for extended advertising. 
 
 
-So at some point I realized that I'd been once again nerdsniped to learn about the innards of BLE implementation on linux. I'm going to put a pin on that research and draw a conclusion for droneaware functionality: It should support extended advertising if the BLE dongle you buy supports it. But you'll probably want to do some testing to be sure.
+But at some point I realized that I'd been once again nerdsniped to learn about the innards of BLE implementation on linux (If I had a nickel...). I'm going to put a pin on that research and draw a conclusion for droneaware functionality: It _should_ support extended advertising if the BLE dongle you buy supports it. But you'll probably want to do some testing to be sure.
 
 
 ### 5G and 2.4G Wifi
 
-If the wifi dongle has support for 5G, and if you have two wifi dongles attached, droneaware will actually set one to 5G exclusively, and the other to 2.4G, which is pretty neat!
+Next up, Wifi!
+
+If the wifi dongle has support for 5G, and if you have two wifi dongles attached, droneaware will actually set one to 5G exclusively, and the other to 2.4G, which is pretty neat! Droneaware also supports just a single dongle with only 2.4, or a dongle that supports both.
 
 
 There's two places you can see how that happens. 
@@ -176,7 +181,7 @@ And the corresponding parsing of the bands:
     return sorted(bands)
 ```
 
-> **NOTE** It's interesting the code in each place is slightly different and not a copy and paste job. I'd guess either there's been iterations in one place and not the other, or, since this is AI-supported, AI generated slightly different functions in the different locations. 
+> **NOTE** It's interesting the code in each place is slightly different and not a copy and paste job. I'd guess either there's been iterations in one place and not the other, or, since this is AI-supported, AI generated slightly different functions in the different locations. The bash script version does mention the `_wclassifier_parse_bands` function used in the wifi feeder though.
 
 Either way, Droneaware sets the wifi interfaces to monitor mode by just running bash commands from python:
 
@@ -198,8 +203,9 @@ Then creates a socket listening to packets coming from the wifi interface, which
 
 ### Parsing Remote ID protocols
 
-Droneaware uses custom parsing included in the `ble_feeder.py` and `wifi_feeder.py` in the `decode_rid_message` function to parse the Basic ID, Location, System, Operator ID, and pack message types. As of this writing, the Wi-Fi NAN Remote ID is still not parsed in the code, and I'm not entirely sure why, since it's so similar to the beacon frame, which _is_ parsed in `wifi_feeder.py`. Maybe a forgotten TODO?
+Droneaware uses custom parsing included in the `ble_feeder.py` and `wifi_feeder.py` in the `decode_rid_message` function. This is used to parse the Basic ID, Location, System, Operator ID, and pack message types. As of this writing, the Wi-Fi NAN Remote ID is still not parsed in the code, and I'm not entirely sure why, since it's so similar to the beacon frame, which _is_ parsed in `wifi_feeder.py`. Maybe a forgotten TODO?
 
+The fully parsed (or partially parsed) remote ID messages are then stored locally and sent up to the droneaware server, where they're added to the detections shared on the site. If you're the owner of the node, you'll also receive an email alert of the drone detection, which is pretty neat!
 
 ### Some Cons
 
@@ -233,9 +239,9 @@ I run an ADSB feeder that feeds multiple websites, but based on the current lice
 > **NOTE** You may notice, this license also prohibits reverse engineering/decompiling/disassembly of binaries. All code snippets and reviews are on the un-compiled python scripts included in the release, so I'm not doing those things. Just if you were worried.
 
 
-Another issue is that the data is mostly aggregated and sent up to the server side of things. Having a local copy of all detections is not as supported out of the box, and feels a bit clunky. There's a `/run/droneaware/detections.jsonl` file that keeps detections for the last 60 minutes or so, and  from v1.6, the node also keeps its own detection history on the SD card in the folder `/var/lib/droneaware/spool`. But neither of these are easily accessible on the droneaware website or on the local viewer, so you have to do your own shenanigans to get and keep detections. This feels a little nit-picky, but since the droneaware website is partially about getting enough data to start selling it to others (similar to adsb trackers), I want a little easier access to my own data.
+Another issue is that the data is mostly aggregated and sent up to the server side of things. Having a local copy of all detections has not been a priority as this has been developed, and feels a bit clunky. There's a `/run/droneaware/detections.jsonl` file stored on the pi that keeps detections for the last 60 minutes or so, and starting from version 1.6, the node also keeps its own detection history on the SD card in the folder `/var/lib/droneaware/spool`. But neither of these are easily accessible on the droneaware website or on the local viewer, so you have to do your own shenanigans to get and keep detections. This feels a little nit-picky, but since the droneaware website is partially about getting enough data to start selling it to others (similar to adsb trackers), I want a little easier access to my own data.
 
-> **NOTE** Since writing this, I've learned the CSV download for your personal nodes has moved into the `Settings` menu on the droneaware website. This makes shenanigans feel less likely, but it does still feel a bit hidden.
+> **NOTE** Since writing this, I've learned the CSV download for your personal nodes that used to be on the website's history tab has moved into the `Settings` menu. This makes it easier to periodically download, but it does still feel a bit hidden.
 
 
 ### Droneaware Functionality Conclusion
@@ -244,18 +250,28 @@ The initial setup and slick local web viewer plus online aggregator is really ni
 
 Because it's currently the only game in town for crowd-sourced drone aggregators, however, I worry that things will get closed off or the data hidden, and people wouldn't be able to stop them. I also worry about how quickly the code iteration is happening with so much vibe-coding. The codebase is getting bigger very fast, when do things start breaking?
 
-> **NOTE** This worry may be because I'm a curmudgeon. Take it as you will.
+> **NOTE** This worry may be because I'm a curmudgeon. The release github does not include any tests, but the main repo is hidden, so maybe the tests are all there. Take it as you will.
 
 But in the meantime, I will be running a droneaware node myself, and hope my worries are unfounded. 
 
+## My Setup
+
+I currently am running a droneaware node on the raspberry pi I have setup for [adsb tracking]({% post_url 2026-03-03-adsb-radio-setup %}).
+
+Hardware side, I'm currently using the [Parani-UD100](https://www.senanetworks.com/products/parani-ud100-bluetooth-4-0-class1-usb-adapter-exchangeable-antenna) for bluetooth that I got off of ebay. For Wifi, I have two dongles, a [Panda AXE3000](https://www.pandawireless.com/pandaAXE3000dualant.html) and an alfa wireless [Alfa AWUS036ACM dual band](https://www.amazon.com/Network-AWUS036ACM-Long-Range-Wide-Coverage-High-Sensitivity/dp/B08BJS8FXD).
+
+> **NOTE** The main things you want for the wifi dongles are a) can run as monitor mode in linux, and b) have antenna that can be disconnected and replaced with an even better one, for upgrade reasons. You can check that once you have the dongle by trying to set it to monitor mode yourself on the pi, [using the iw command](https://www.geeksforgeeks.org/linux-unix/how-to-put-wifi-interface-into-monitor-mode-in-linux/)
+
+Software configuration side of things, I just setup the ssh functionality on my pi with the built-in support the [adsb.im image has](https://adsb.im/using), and then followed the [steps on droneaware to install](https://droneaware.io/build-a-raspberry-pi-remote-id-receiver.html) and run the services. Which is pretty much just a classic "pipe a random bash script into a rooted bash instance" which I always find funny. I love running mystery scripts I find online!
+
 ## Current Detection Results
 
-So far, my node has been detecting via beacon frames, up to about 1.5 miles out, though normally it's more about a half mile average. It's also only detected DJI drones. 
+So far, my node has been detecting via wifi beacon frames, up to about 1.5 miles out, though normally it's more about a half mile average. It's also only detected DJI drones. The website has a "trophy wall" where it collects all the drone models you've detected, as kind of a fun gamifying sort of thing.
 
-![](/assets/droneaware/droneaware_trophy_wall.png)
+![screenshot of the droneaware website's trophy wall page. It displays every model I've detected, as well as how common it is based on other detections.](/assets/droneaware/droneaware_trophy_wall.png)
 
 
-I think I'd get better range if I could get my antenna up a little higher and move them outside (right now they're just against my window), and I'm curious if I'll be getting more range over the winter, when the nearby trees are all de-leafed (Since "foliage attenuation" is apparently [a thing](https://ieeexplore.ieee.org/document/5765439)). 
+I think I'd get better range if I could get my antenna up a little higher and move them outside (right now they're just inside against my window), and I'm curious if I'll be getting more range over the winter, when the nearby trees are all de-leafed (Since "foliage attenuation" is apparently [a thing](https://ieeexplore.ieee.org/document/5765439)). 
 
 It's fun to see the drones that droneaware catches and it's so easy to setup, I'd recommend checking it out yourself!
 

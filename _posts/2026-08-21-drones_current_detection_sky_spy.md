@@ -29,7 +29,7 @@ First up: The first drone detection hardware/firmware I came across, Colonel Pan
 
 
 <!--more-->
-
+{% include series-index.html content="remote ID" %}
 
 
 > **NOTE** Highly recommend reading my previous post about the remote ID transmission types, if you haven't already. This post assumes you know about that already.
